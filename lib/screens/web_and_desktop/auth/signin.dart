@@ -1,6 +1,7 @@
 // lib/signin_page.dart
-import 'package:ethioworks/home.dart';
-import 'package:ethioworks/signup.dart';
+import 'package:ethioworks/screens/web_and_desktop/top_navbar_screens/employer/home_page.dart';
+import 'package:ethioworks/screens/web_and_desktop/top_navbar_screens/job_seeker/home_page.dart' hide HomePage;
+import 'package:ethioworks/screens/web_and_desktop/auth/signup.dart';
 import 'package:flutter/material.dart';
 
 class SignInPage extends StatelessWidget {
@@ -85,7 +86,7 @@ class SignInPage extends StatelessWidget {
                     height: 55,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage  ()));
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomePage()));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF0052CC),
