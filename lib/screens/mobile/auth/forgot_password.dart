@@ -1,84 +1,138 @@
+import 'package:ethioworks/utils/validator.dart';
+import 'package:ethioworks/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:ethioworks/providers/auth_provider.dart';
+import 'package:ethioworks/widgets/custom_button.dart';
+import 'package:ethioworks/theme.dart';
 
-class ForgotPasswordScreen extends StatelessWidget {
+class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+}
+
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleResetPassword() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.resetPassword(_emailController.text.trim());
+
+    if (!mounted) return;
+
+    if (success) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Success'),
+          content: const Text('Password reset instructions have been sent to your email.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.errorMessage ?? 'Password reset failed'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final authProvider = context.watch<AuthProvider>();
+
     return Scaffold(
-      backgroundColor: const Color(0xfff5f5f5),
-      body: Center(
-        child: Container(
-          width: 480,
-          color: Colors.white,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: AppSpacing.paddingLg,
+          child: Form(
+            key: _formKey,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text("JobFinder",
-                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blue)),
-                const SizedBox(height: 8),
-                const Text("Reset your password", style: TextStyle(color: Colors.grey)),
-                const SizedBox(height: 40),
-
-                _input("Email"),
-                const SizedBox(height: 10),
-                const Text(
-                  "We'll send you a link to reset your password.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
+                const SizedBox(height: AppSpacing.xl),
+                Icon(
+                  Icons.lock_reset,
+                  size: 80,
+                  color: theme.colorScheme.primary,
                 ),
-                const SizedBox(height: 20),
-
-                _primaryBtn("Send Reset Link", context),
-
-                const SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: const Text(
-                    "← Back to Sign In",
-                    style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w500),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  'Forgot Password?',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  "Don't worry! Enter your email address and we'll send you instructions to reset your password.",
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xxl),
+                CustomTextField(
+                  label: 'Email Address',
+                  hint: 'your.email@example.com',
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  prefixIcon: Icons.email_outlined,
+                  validator: Validators.validateEmail,
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                CustomButton(
+                  text: 'Send Reset Link',
+                  onPressed: _handleResetPassword,
+                  isLoading: authProvider.isLoading,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Center(
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      'Back to Login',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _input(String label) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-        const SizedBox(height: 8),
-        TextField(
-          decoration: InputDecoration(
-            hintText: label,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _primaryBtn(String text, BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text("Demo only")));
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        child: Text(text,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }
