@@ -1,5 +1,5 @@
-import 'package:ethioworks/screens/mobile/employer/employer_home_page.dart';
-import 'package:ethioworks/screens/mobile/job_seeker/job_seeker_home_page.dart';
+import 'package:ethioworks/screens/web_and_desktop/employer/employer_root.dart';
+import 'package:ethioworks/screens/web_and_desktop/job_seeker/job_seeker_root.dart';
 import 'package:ethioworks/screens/web_and_desktop/auth/signin.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -39,9 +39,9 @@ class _WebSplashScreenState extends State<WebSplashScreen> with SingleTickerProv
 
     if (authProvider.isLoggedIn) {
       if (authProvider.isJobSeeker) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const SeekerHomeScreen()));
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const JobSeekerRoot()));
       } else {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const EmployerHomeScreen()));
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const EmployerRoot()));
       }
     } else {
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const WebLoginScreen()));

@@ -1,9 +1,9 @@
-import 'package:ethioworks/screens/mobile/employer/employer_home_page.dart';
+import 'package:ethioworks/screens/mobile/employer/employer_root.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ethioworks/providers/auth_provider.dart';
 import 'package:ethioworks/screens/mobile/auth/signin.dart';
-import 'package:ethioworks/screens/mobile/job_seeker/job_seeker_home_page.dart';
+import 'package:ethioworks/screens/mobile/job_seeker/job_seeker_root.dart';
 import 'package:ethioworks/theme.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -46,11 +46,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     if (authProvider.isLoggedIn) {
       if (authProvider.isJobSeeker) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const SeekerHomeScreen()),
+          MaterialPageRoute(builder: (_) => const JobSeekerRoot()),
         );
       } else {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const EmployerHomeScreen()),
+          MaterialPageRoute(builder: (_) => const EmployerRoot()),
         );
       }
     } else {
