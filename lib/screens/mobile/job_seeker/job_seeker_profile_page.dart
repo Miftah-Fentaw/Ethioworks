@@ -32,7 +32,7 @@ class SeekerProfileScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  ProfileAvatar(imageUrl: seeker.profilePic, name: seeker.name, size: 100),
+                  ProfileAvatar(imageUrl: seeker.profilePic, name: seeker.name, size: 100, avatarType: AvatarType.jobSeeker),
                   const SizedBox(height: AppSpacing.md),
                   Text(seeker.name, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                   if (seeker.title != null) ...[

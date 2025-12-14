@@ -58,7 +58,7 @@ class _AllApplicantsScreenState extends State<AllApplicantsScreen> {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
-                    leading: ProfileAvatar(imageUrl: null, name: a.applicantName, size: 48),
+                    leading: ProfileAvatar(imageUrl: null, name: a.applicantName, size: 48, avatarType: AvatarType.jobSeeker),
                     title: Text(a.applicantName),
                     subtitle: Text(a.email),
                     trailing: const Icon(Icons.chevron_right),

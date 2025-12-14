@@ -71,7 +71,7 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
                           padding: AppSpacing.paddingMd,
                           child: Row(
                             children: [
-                              ProfileAvatar(imageUrl: null, name: application.applicantName, size: 50),
+                              ProfileAvatar(imageUrl: null, name: application.applicantName, size: 50, avatarType: AvatarType.jobSeeker),
                               const SizedBox(width: AppSpacing.md),
                               Expanded(
                                 child: Column(

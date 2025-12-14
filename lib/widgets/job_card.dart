@@ -59,6 +59,7 @@ class JobCard extends StatelessWidget {
                     imageUrl: job.companyProfilePic,
                     name: job.companyName,
                     size: 50,
+                    avatarType: AvatarType.company,
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(

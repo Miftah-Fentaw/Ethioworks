@@ -99,6 +99,7 @@ class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
               imageUrl: seeker?.profilePic,
               name: seeker?.name ?? 'User',
               size: 32,
+              avatarType: AvatarType.jobSeeker,
             ),
             onPressed: () {
               Navigator.push(

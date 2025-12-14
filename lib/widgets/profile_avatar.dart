@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 
+enum AvatarType { jobSeeker, employer, company }
+
 class ProfileAvatar extends StatelessWidget {
   final String? imageUrl;
   final String name;
   final double size;
+  final AvatarType? avatarType;
 
   const ProfileAvatar({
     super.key,
     this.imageUrl,
     required this.name,
     this.size = 40,
+    this.avatarType,
   });
 
   String _getInitials(String name) {
@@ -23,6 +27,21 @@ class ProfileAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    String? asset;
+    if (avatarType != null) {
+      switch (avatarType!) {
+        case AvatarType.jobSeeker:
+          asset = 'assets/images/user_circled.png';
+          break;
+        case AvatarType.employer:
+          asset = 'assets/images/employer.png';
+          break;
+        case AvatarType.company:
+          asset = 'assets/images/company.png';
+          break;
+      }
+    }
+
     return Container(
       width: size,
       height: size,
@@ -31,10 +50,12 @@ class ProfileAvatar extends StatelessWidget {
         color: theme.colorScheme.primaryContainer,
         border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2), width: 1),
       ),
-      child: imageUrl != null && imageUrl!.isNotEmpty
+      child: asset != null
           ? ClipOval(
-              child: Image.network(
-                imageUrl!,
+              child: Image.asset(
+                asset,
+                width: size,
+                height: size,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Center(
                   child: Text(
@@ -48,16 +69,33 @@ class ProfileAvatar extends StatelessWidget {
                 ),
               ),
             )
-          : Center(
-              child: Text(
-                _getInitials(name),
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: theme.colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.w600,
-                  fontSize: size * 0.4,
+          : imageUrl != null && imageUrl!.isNotEmpty
+              ? ClipOval(
+                  child: Image.network(
+                    imageUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Center(
+                      child: Text(
+                        _getInitials(name),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: theme.colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.w600,
+                          fontSize: size * 0.4,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : Center(
+                  child: Text(
+                    _getInitials(name),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w600,
+                      fontSize: size * 0.4,
+                    ),
+                  ),
                 ),
-              ),
-            ),
     );
   }
 }

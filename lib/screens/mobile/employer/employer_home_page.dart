@@ -58,6 +58,7 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
               imageUrl: employer?.profilePic,
               name: employer?.companyOrPersonalName ?? 'Company',
               size: 32,
+              avatarType: AvatarType.employer,
             ),
             onPressed: () {
               Navigator.push(

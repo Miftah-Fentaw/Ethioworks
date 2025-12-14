@@ -22,7 +22,7 @@ class ApplicantDetailScreen extends StatelessWidget {
             Center(
               child: Column(
                 children: [
-                  ProfileAvatar(imageUrl: null, name: application.applicantName, size: 100),
+                  ProfileAvatar(imageUrl: null, name: application.applicantName, size: 100, avatarType: AvatarType.jobSeeker),
                   const SizedBox(height: AppSpacing.md),
                   Text(application.applicantName, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                   if (application.applicantTitle != null) ...[

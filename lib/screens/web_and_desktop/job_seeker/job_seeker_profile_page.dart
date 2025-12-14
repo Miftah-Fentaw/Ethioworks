@@ -41,7 +41,7 @@ class SeekerProfileScreen extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            ProfileAvatar(imageUrl: seeker.profilePic, name: seeker.name, size: 200),
+                            ProfileAvatar(imageUrl: seeker.profilePic, name: seeker.name, size: 200, avatarType: AvatarType.jobSeeker),
                             const SizedBox(height: AppSpacing.lg),
                             Text(seeker.name, style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
                             if (seeker.title != null) ...[
@@ -103,7 +103,7 @@ class SeekerProfileScreen extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        ProfileAvatar(imageUrl: seeker.profilePic, name: seeker.name, size: 100),
+                        ProfileAvatar(imageUrl: seeker.profilePic, name: seeker.name, size: 100, avatarType: AvatarType.jobSeeker),
                         const SizedBox(height: AppSpacing.md),
                         Text(seeker.name, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                         if (seeker.title != null) ...[

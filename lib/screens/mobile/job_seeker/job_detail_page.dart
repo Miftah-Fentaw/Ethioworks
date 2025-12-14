@@ -140,6 +140,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                         imageUrl: _job!.companyProfilePic,
                         name: _job!.companyName,
                         size: 70,
+                        avatarType: AvatarType.company,
                       ),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(

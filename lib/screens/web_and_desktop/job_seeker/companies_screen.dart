@@ -42,7 +42,7 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
-                    leading: ProfileAvatar(imageUrl: c.profilePic, name: c.companyOrPersonalName, size: 48),
+                    leading: ProfileAvatar(imageUrl: c.profilePic, name: c.companyOrPersonalName, size: 48, avatarType: AvatarType.company),
                     title: Text(c.companyOrPersonalName ?? ''),
                     subtitle: Text('${c.followers} followers'),
                   ),

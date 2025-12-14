@@ -30,7 +30,7 @@ class EmployerProfileScreen extends StatelessWidget {
               decoration: BoxDecoration(color: theme.colorScheme.primaryContainer),
               child: Column(
                 children: [
-                  ProfileAvatar(imageUrl: employer.profilePic, name: employer.companyOrPersonalName, size: 100),
+                  ProfileAvatar(imageUrl: employer.profilePic, name: employer.companyOrPersonalName, size: 100, avatarType: AvatarType.employer),
                   const SizedBox(height: AppSpacing.md),
                   Text(employer.companyOrPersonalName, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: AppSpacing.sm),
