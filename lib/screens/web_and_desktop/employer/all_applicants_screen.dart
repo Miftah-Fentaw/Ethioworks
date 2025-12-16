@@ -29,44 +29,63 @@ class _AllApplicantsScreenState extends State<AllApplicantsScreen> {
     final auth = context.read<AuthProvider>();
     final employer = auth.currentEmployer;
     if (employer == null) {
-      if (mounted) setState(() { _applications = []; _loading = false; });
+      if (mounted)
+        setState(() {
+          _applications = [];
+          _loading = false;
+        });
       return;
     }
 
-    final jobs = jobProvider.jobs.where((j) => j.employerId == employer.id).toList();
+    final jobs =
+        jobProvider.jobs.where((j) => j.employerId == employer.id).toList();
     final apps = <Application>[];
     for (final job in jobs) {
       final list = await _service.getApplicationsByJob(job.id);
       apps.addAll(list);
     }
 
-    if (mounted) setState(() { _applications = apps; _loading = false; });
+    if (mounted)
+      setState(() {
+        _applications = apps;
+        _loading = false;
+      });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (_loading)
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Applicants')),
-      body: _applications.isEmpty
-          ? const Center(child: Text('No applicants yet'))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _applications.length,
-              itemBuilder: (context, i) {
-                final a = _applications[i];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    leading: ProfileAvatar(imageUrl: null, name: a.applicantName, size: 48),
-                    title: Text(a.applicantName),
-                    subtitle: Text(a.email),
-                    trailing: const Icon(Icons.chevron_right),
-                  ),
-                );
-              },
-            ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: _applications.isEmpty
+              ? const Center(child: Text('No applicants yet'))
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _applications.length,
+                  itemBuilder: (context, i) {
+                    final a = _applications[i];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: ListTile(
+                        leading: ProfileAvatar(
+                            imageUrl: null, name: a.applicantName, size: 48),
+                        title: Text(a.applicantName),
+                        subtitle: Text(a.email),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          // TODO: Navigate to detail
+                        },
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ),
     );
   }
 }

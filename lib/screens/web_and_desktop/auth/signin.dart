@@ -110,10 +110,13 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
           validator: Validators.validatePassword,
           suffixIcon: IconButton(
             icon: Icon(
-              _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+              _obscurePassword
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
               color: theme.colorScheme.onSurfaceVariant,
             ),
-            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+            onPressed: () =>
+                setState(() => _obscurePassword = !_obscurePassword),
           ),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -122,7 +125,8 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
           child: TextButton(
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const WebForgotPasswordScreen()),
+                MaterialPageRoute(
+                    builder: (_) => const WebForgotPasswordScreen()),
               );
             },
             child: Text(
@@ -146,21 +150,61 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
             Expanded(child: Divider(color: theme.colorScheme.outline)),
             Padding(
               padding: AppSpacing.horizontalMd,
-              child: Text('OR', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+              child: Text('OR',
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
             ),
             Expanded(child: Divider(color: theme.colorScheme.outline)),
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
-        CustomButton(
-          text: 'Continue with Google',
-          icon: Icons.login,
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Google Sign-In coming soon!')),
-            );
-          },
-          isOutlined: true,
+        // same as the custom button but for Google Sign-In
+        // and no using custom button
+        ElevatedButton.icon(
+          onPressed: authProvider.isLoading
+              ? null
+              : () async {
+                  // TODO: Implement Google Sign-In
+                  const success = true; // Placeholder for logic
+
+                  if (!mounted) return;
+                  if (success) {
+                    if (authProvider.isJobSeeker) {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (_) => const JobSeekerRoot()),
+                      );
+                    } else {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (_) => const EmployerRoot()),
+                      );
+                    }
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(authProvider.errorMessage ??
+                            'Google Sign-In failed'),
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                    );
+                  }
+                },
+          icon: Image.asset(
+            'assets/google.png',
+            height: 24,
+            width: 24,
+          ),
+          label: Text(
+            authProvider.isLoading ? 'Signing in...' : 'Sign in with Google',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.primary,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+          ),
         ),
         const SizedBox(height: AppSpacing.xl),
         Row(
@@ -189,28 +233,48 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
           final bool isWide = constraints.maxWidth >= 900;
 
           if (isWide) {
+            // Modern Web/Desktop Layout
             return Row(
               children: [
+                // Form Section with Modern Card Design
                 Expanded(
                   child: Container(
-                    color: Theme.of(context).colorScheme.surface,
-                    padding: const EdgeInsets.all(40),
+                    color: theme.colorScheme.background,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 48, vertical: 40),
                     child: Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 480),
                         child: SingleChildScrollView(
-                          child: Form(key: _formKey, child: _buildFormContent()),
+                          child: Card(
+                            elevation: 8,
+                            shadowColor: theme.colorScheme.primary
+                                .withValues(alpha: 0.1),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppRadius.lg),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(32),
+                              child: Form(
+                                key: _formKey,
+                                child: _buildFormContent(),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
+                // Hero Image Section with Modern Gradient
                 Expanded(
                   child: Stack(
                     fit: StackFit.expand,
@@ -219,19 +283,41 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                         'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
                         fit: BoxFit.cover,
                       ),
-                      Container(color: Colors.black.withOpacity(0.5)),
-                      const Center(
+                      
+                      Center(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 48),
-                          child: Text(
-                            'Discover Your\nNext Opportunity\nin Ethiopia',
-                            style: TextStyle(
-                              fontSize: 42,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              height: 1.3,
-                            ),
-                            textAlign: TextAlign.center,
+                          padding: const EdgeInsets.symmetric(horizontal: 48),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.work_rounded,
+                                size: 80,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(height: AppSpacing.xl),
+                              Text(
+                                'Discover Your\nNext Opportunity\nin Ethiopia',
+                                style: TextStyle(
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  height: 1.2,
+                                  letterSpacing: -0.5,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: AppSpacing.lg),
+                              Text(
+                                'Connect with top employers and find your dream job',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  height: 1.5,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -241,7 +327,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
               ],
             );
           } else {
-            // Mobile layout
+            // Mobile layout - unchanged
             return SafeArea(
               child: SingleChildScrollView(
                 padding: AppSpacing.paddingLg,

@@ -146,7 +146,6 @@ class _WebForgotPasswordScreenState extends State<WebForgotPasswordScreen> {
                         'https://images.unsplash.com/photo-1588196746584-700c91e9dc2b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
                         fit: BoxFit.cover,
                       ),
-                      Container(color: Colors.black.withOpacity(0.5)),
                       const Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 48),

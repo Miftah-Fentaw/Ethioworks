@@ -3,13 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:ethioworks/models/job_post_model.dart';
 import 'package:ethioworks/providers/auth_provider.dart';
 import 'package:ethioworks/providers/job_provider.dart';
-import 'package:ethioworks/screens/mobile/job_seeker/job_detail_page.dart';
-import 'package:ethioworks/screens/mobile/job_seeker/job_seeker_profile_page.dart';
+import 'package:ethioworks/screens/web_and_desktop/job_seeker/job_detail_page.dart';
+import 'package:ethioworks/screens/web_and_desktop/job_seeker/job_seeker_profile_page.dart';
 import 'package:ethioworks/widgets/job_card.dart';
 import 'package:ethioworks/widgets/profile_avatar.dart';
 import 'package:ethioworks/theme.dart';
 
-class SeekerHomeScreen extends StatefulWidget {
+class SeekerHomeScreen extends StatefulWidget { 
   const SeekerHomeScreen({super.key});
 
   @override
@@ -78,7 +78,8 @@ class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(Icons.work_rounded, color: theme.colorScheme.primary, size: 28),
+            Icon(Icons.work_rounded,
+                color: theme.colorScheme.primary, size: 28),
             const SizedBox(width: AppSpacing.sm),
             Text(
               'EthioWorks',
@@ -111,64 +112,75 @@ class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
           const SizedBox(width: AppSpacing.sm),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => context.read<JobProvider>().loadJobs(),
-        child: jobProvider.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : jobs.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.work_off, size: 80, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-                        const SizedBox(height: AppSpacing.lg),
-                        Text(
-                          'No jobs available',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          'Check back later for new opportunities',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: AppSpacing.paddingMd,
-                    itemCount: jobs.length,
-                    itemBuilder: (context, index) {
-                      final job = jobs[index];
-                      final userId = authProvider.currentUser?.id ?? '';
-                      
-                      return JobCard(
-                        job: job,
-                        userReaction: _userReactions[job.id],
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => JobDetailScreen(jobId: job.id),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: RefreshIndicator(
+            onRefresh: () => context.read<JobProvider>().loadJobs(),
+            child: jobProvider.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : jobs.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.work_off,
+                                size: 80,
+                                color: theme.colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.5)),
+                            const SizedBox(height: AppSpacing.lg),
+                            Text(
+                              'No jobs available',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
                             ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              'Check back later for new opportunities',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: AppSpacing.paddingMd,
+                        itemCount: jobs.length,
+                        itemBuilder: (context, index) {
+                          final job = jobs[index];
+                          final userId = authProvider.currentUser?.id ?? '';
+
+                          return JobCard(
+                            job: job,
+                            userReaction: _userReactions[job.id],
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      JobDetailScreen(jobId: job.id),
+                                ),
+                              );
+                            },
+                            onLike: () async {
+                              await jobProvider.likeJob(job.id, userId);
+                              final reaction = await jobProvider
+                                  .getUserReaction(job.id, userId);
+                              setState(() => _userReactions[job.id] = reaction);
+                            },
+                            onDislike: () async {
+                              await jobProvider.dislikeJob(job.id, userId);
+                              final reaction = await jobProvider
+                                  .getUserReaction(job.id, userId);
+                              setState(() => _userReactions[job.id] = reaction);
+                            },
                           );
                         },
-                        onLike: () async {
-                          await jobProvider.likeJob(job.id, userId);
-                          final reaction = await jobProvider.getUserReaction(job.id, userId);
-                          setState(() => _userReactions[job.id] = reaction);
-                        },
-                        onDislike: () async {
-                          await jobProvider.dislikeJob(job.id, userId);
-                          final reaction = await jobProvider.getUserReaction(job.id, userId);
-                          setState(() => _userReactions[job.id] = reaction);
-                        },
-                      );
-                    },
-                  ),
+                      ),
+          ),
+        ),
       ),
     );
   }
@@ -245,7 +257,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     selected: _tempLocationType == LocationType.remote,
                     onSelected: (selected) {
                       setState(() {
-                        _tempLocationType = selected ? LocationType.remote : null;
+                        _tempLocationType =
+                            selected ? LocationType.remote : null;
                       });
                     },
                   ),
@@ -254,7 +267,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     selected: _tempLocationType == LocationType.permanent,
                     onSelected: (selected) {
                       setState(() {
-                        _tempLocationType = selected ? LocationType.permanent : null;
+                        _tempLocationType =
+                            selected ? LocationType.permanent : null;
                       });
                     },
                   ),
@@ -263,7 +277,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     selected: _tempLocationType == LocationType.onSite,
                     onSelected: (selected) {
                       setState(() {
-                        _tempLocationType = selected ? LocationType.onSite : null;
+                        _tempLocationType =
+                            selected ? LocationType.onSite : null;
                       });
                     },
                   ),

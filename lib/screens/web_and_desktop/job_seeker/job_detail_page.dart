@@ -5,7 +5,7 @@ import 'package:ethioworks/providers/auth_provider.dart';
 import 'package:ethioworks/providers/job_provider.dart';
 import 'package:ethioworks/providers/application_provider.dart';
 import 'package:ethioworks/services/job_seeker_service.dart';
-import 'package:ethioworks/screens/mobile/job_seeker/apply_job_page.dart';
+import 'package:ethioworks/screens/web_and_desktop/job_seeker/apply_job_page.dart';
 import 'package:ethioworks/widgets/profile_avatar.dart';
 import 'package:ethioworks/widgets/custom_button.dart';
 import 'package:ethioworks/theme.dart';
@@ -35,15 +35,15 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     final jobProvider = context.read<JobProvider>();
     final authProvider = context.read<AuthProvider>();
     final applicationProvider = context.read<ApplicationProvider>();
-    
+
     final job = await jobProvider.getJobById(widget.jobId);
     final seeker = authProvider.currentJobSeeker;
-    
+
     bool isFollowing = false;
     if (seeker != null && job != null) {
       isFollowing = seeker.followedCompanies.contains(job.employerId);
     }
-    
+
     bool hasApplied = false;
     if (authProvider.currentUser != null && job != null) {
       hasApplied = await applicationProvider.hasUserApplied(
@@ -63,12 +63,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   Future<void> _toggleFollow() async {
     final authProvider = context.read<AuthProvider>();
     final seeker = authProvider.currentJobSeeker;
-    
+
     if (seeker == null || _job == null) return;
 
     final service = JobSeekerService();
     bool success;
-    
+
     if (_isFollowing) {
       success = await service.unfollowCompany(seeker.id, _job!.employerId);
     } else {
@@ -120,124 +120,160 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           IconButton(
             icon: Icon(
               _isFollowing ? Icons.favorite : Icons.favorite_border,
-              color: _isFollowing ? theme.colorScheme.tertiary : theme.colorScheme.onSurface,
+              color: _isFollowing
+                  ? theme.colorScheme.tertiary
+                  : theme.colorScheme.onSurface,
             ),
             onPressed: _toggleFollow,
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: AppSpacing.paddingLg,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      ProfileAvatar(
-                        imageUrl: _job!.companyProfilePic,
-                        name: _job!.companyName,
-                        size: 70,
-                        avatarType: AvatarType.company,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.all(AppSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    ],
+                  ),
+                  child: SingleChildScrollView(
+                    padding: AppSpacing.paddingLg,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Text(
-                              _job!.title,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                            ProfileAvatar(
+                              imageUrl: _job!.companyProfilePic,
+                              name: _job!.companyName,
+                              size: 70,
+                              avatarType: AvatarType.company,
                             ),
-                            const SizedBox(height: AppSpacing.xs),
-                            Text(
-                              _job!.companyName,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _job!.title,
+                                    style:
+                                        theme.textTheme.headlineSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  Text(
+                                    _job!.companyName,
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Row(
-                    children: [
-                      Icon(Icons.location_on_outlined, size: 18, color: theme.colorScheme.primary),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(_getLocationTypeLabel(_job!.locationType), style: theme.textTheme.bodyMedium),
-                      const SizedBox(width: AppSpacing.lg),
-                      Icon(Icons.payments_outlined, size: 18, color: theme.colorScheme.secondary),
-                      const SizedBox(width: AppSpacing.xs),
-                      Flexible(child: Text(_job!.salary, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600))),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  _buildSection('Description', _job!.description, theme),
-                  const SizedBox(height: AppSpacing.lg),
-                  if (_job!.roles.isNotEmpty) ...[
-                    _buildListSection('Roles & Responsibilities', _job!.roles, theme),
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
-                  if (_job!.expectedSkills.isNotEmpty) ...[
-                    _buildChipSection('Required Skills', _job!.expectedSkills, theme),
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
-                  _buildSection('Education', _job!.education, theme),
-                ],
-              ),
-            ),
-          ),
-          Container(
-            padding: AppSpacing.paddingLg,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              border: Border(top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2))),
-            ),
-            child: SafeArea(
-              child: _hasApplied
-                  ? Container(
-                      padding: AppSpacing.paddingMd,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.check_circle, color: theme.colorScheme.primary),
-                          const SizedBox(width: AppSpacing.sm),
-                          Text(
-                            'Already Applied',
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        const SizedBox(height: AppSpacing.lg),
+                        Row(
+                          children: [
+                            Icon(Icons.location_on_outlined,
+                                size: 18, color: theme.colorScheme.primary),
+                            const SizedBox(width: AppSpacing.xs),
+                            Text(_getLocationTypeLabel(_job!.locationType),
+                                style: theme.textTheme.bodyMedium),
+                            const SizedBox(width: AppSpacing.lg),
+                            Icon(Icons.payments_outlined,
+                                size: 18, color: theme.colorScheme.secondary),
+                            const SizedBox(width: AppSpacing.xs),
+                            Flexible(
+                                child: Text(_job!.salary,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                        fontWeight: FontWeight.w600))),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        _buildSection('Description', _job!.description, theme),
+                        const SizedBox(height: AppSpacing.lg),
+                        if (_job!.roles.isNotEmpty) ...[
+                          _buildListSection(
+                              'Roles & Responsibilities', _job!.roles, theme),
+                          const SizedBox(height: AppSpacing.lg),
                         ],
-                      ),
-                    )
-                  : CustomButton(
-                      text: 'Apply Now',
-                      icon: Icons.send,
-                      onPressed: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => ApplyJobScreen(job: _job!)),
-                        );
-                        if (result == true) {
-                          setState(() => _hasApplied = true);
-                        }
-                      },
+                        if (_job!.expectedSkills.isNotEmpty) ...[
+                          _buildChipSection(
+                              'Required Skills', _job!.expectedSkills, theme),
+                          const SizedBox(height: AppSpacing.lg),
+                        ],
+                        _buildSection('Education', _job!.education, theme),
+                      ],
                     ),
-            ),
+                  ),
+                ),
+              ),
+              Container(
+                constraints: const BoxConstraints(maxWidth: 800),
+                padding: AppSpacing.paddingLg,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  border: Border(
+                      top: BorderSide(
+                          color: theme.colorScheme.outline
+                              .withValues(alpha: 0.2))),
+                ),
+                child: SafeArea(
+                  child: _hasApplied
+                      ? Container(
+                          padding: AppSpacing.paddingMd,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(AppRadius.md),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.check_circle,
+                                  color: theme.colorScheme.primary),
+                              const SizedBox(width: AppSpacing.sm),
+                              Text(
+                                'Already Applied',
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : CustomButton(
+                          text: 'Apply Now',
+                          icon: Icons.send,
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => ApplyJobScreen(job: _job!)),
+                            );
+                            if (result == true) {
+                              setState(() => _hasApplied = true);
+                            }
+                          },
+                        ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -246,7 +282,9 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        Text(title,
+            style: theme.textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: AppSpacing.sm),
         Text(content, style: theme.textTheme.bodyMedium),
       ],
@@ -257,18 +295,21 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        Text(title,
+            style: theme.textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: AppSpacing.sm),
         ...items.map((item) => Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('• ', style: theme.textTheme.bodyMedium),
-              Expanded(child: Text(item, style: theme.textTheme.bodyMedium)),
-            ],
-          ),
-        )),
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('• ', style: theme.textTheme.bodyMedium),
+                  Expanded(
+                      child: Text(item, style: theme.textTheme.bodyMedium)),
+                ],
+              ),
+            )),
       ],
     );
   }
@@ -277,19 +318,27 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        Text(title,
+            style: theme.textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
-          children: items.map((skill) => Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-            ),
-            child: Text(skill, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimaryContainer, fontWeight: FontWeight.w600)),
-          )).toList(),
+          children: items
+              .map((skill) => Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                    ),
+                    child: Text(skill,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onPrimaryContainer,
+                            fontWeight: FontWeight.w600)),
+                  ))
+              .toList(),
         ),
       ],
     );
