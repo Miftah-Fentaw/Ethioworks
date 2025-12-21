@@ -1,7 +1,7 @@
 import 'package:ethioworks/screens/mobile/auth/forgot_password.dart';
 import 'package:ethioworks/screens/mobile/auth/signup.dart';
-import 'package:ethioworks/screens/mobile/employer/employer_home_page.dart';
-import 'package:ethioworks/screens/mobile/job_seeker/job_seeker_home_page.dart';
+import 'package:ethioworks/screens/mobile/employer/employer_root.dart';
+import 'package:ethioworks/screens/mobile/job_seeker/job_seeker_root.dart';
 import 'package:ethioworks/utils/validator.dart';
 import 'package:ethioworks/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
@@ -44,11 +44,11 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success) {
       if (authProvider.isJobSeeker) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const SeekerHomeScreen()),
+          MaterialPageRoute(builder: (_) => const JobSeekerRoot()),
         );
       } else {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const EmployerHomeScreen()),
+          MaterialPageRoute(builder: (_) => const EmployerRoot()),
         );
       }
     } else {
@@ -117,10 +117,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   validator: Validators.validatePassword,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                      _obscurePassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -129,7 +132,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextButton(
                     onPressed: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => const ForgotPasswordScreen()),
                       );
                     },
                     child: Text(
@@ -166,10 +170,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: AppSpacing.lg),
                 CustomButton(
                   text: 'Continue with Google',
-                  icon: Icons.login,
+                  assetIcon: 'assets/google.png',
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Google Sign-In coming soon!')),
+                      const SnackBar(
+                          content: Text('Google Sign-In coming soon!')),
                     );
                   },
                   isOutlined: true,
@@ -185,7 +190,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (_) => const SignupScreen()),
+                          MaterialPageRoute(
+                              builder: (_) => const SignupScreen()),
                         );
                       },
                       child: Text(
