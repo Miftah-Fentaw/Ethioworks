@@ -37,8 +37,9 @@ class CustomTextField extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             color: theme.colorScheme.onSurface,
+            letterSpacing: 0.5,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -49,13 +50,18 @@ class CustomTextField extends StatelessWidget {
           keyboardType: keyboardType,
           maxLines: maxLines,
           enabled: enabled,
-          style: theme.textTheme.bodyMedium,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w500,
+          ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
             ),
-            prefixIcon: prefixIcon != null ? Icon(prefixIcon, size: 20, color: theme.colorScheme.primary) : null,
+            prefixIcon: prefixIcon != null
+                ? Icon(prefixIcon, size: 20, color: theme.colorScheme.primary)
+                : null,
             suffixIcon: suffixIcon,
             filled: true,
             fillColor: theme.colorScheme.surfaceContainerHighest,
@@ -65,21 +71,26 @@ class CustomTextField extends StatelessWidget {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.md),
-              borderSide: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
+              borderSide:
+                  BorderSide(color: theme.colorScheme.outline, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.md),
-              borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+              borderSide:
+                  BorderSide(color: theme.colorScheme.primary, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.md),
-              borderSide: BorderSide(color: theme.colorScheme.error),
+              borderSide: BorderSide(color: theme.colorScheme.error, width: 1),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.md),
               borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
             ),
-            contentPadding: AppSpacing.paddingMd,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
           ),
         ),
       ],

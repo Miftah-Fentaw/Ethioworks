@@ -43,22 +43,31 @@ class JobCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(
+          color: theme.colorScheme.outline,
+          width: 1,
+        ),
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         child: Padding(
-          padding: AppSpacing.paddingMd,
+          padding: AppSpacing.paddingLg,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ProfileAvatar(
                     imageUrl: job.companyProfilePic,
                     name: job.companyName,
-                    size: 50,
+                    size: 56,
                     avatarType: AvatarType.company,
                   ),
                   const SizedBox(width: AppSpacing.md),
@@ -71,6 +80,7 @@ class JobCard extends StatelessWidget {
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.onSurface,
+                            fontSize: 18,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -80,142 +90,181 @@ class JobCard extends StatelessWidget {
                           job.companyName,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: AppSpacing.sm),
                   Text(
                     _getTimeAgo(job.createdAt),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  Icon(Icons.location_on_outlined, size: 16, color: theme.colorScheme.primary),
-                  const SizedBox(width: AppSpacing.xs),
-                  Text(
-                    _getLocationTypeLabel(job.locationType),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Icon(Icons.payments_outlined, size: 16, color: theme.colorScheme.secondary),
-                  const SizedBox(width: AppSpacing.xs),
-                  Flexible(
-                    child: Text(
-                      job.salary,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
+              const SizedBox(height: AppSpacing.lg),
+              _buildInfoRow(theme),
               const SizedBox(height: AppSpacing.md),
               Text(
                 job.description,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurface,
+                  height: 1.5,
                 ),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
               if (job.expectedSkills.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.md),
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: job.expectedSkills.take(3).map((skill) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                    ),
-                    child: Text(
-                      skill,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  )).toList(),
-                ),
+                const SizedBox(height: AppSpacing.lg),
+                _buildSkillsWrap(theme),
               ],
               if (onLike != null && onDislike != null) ...[
-                const SizedBox(height: AppSpacing.md),
-                Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
-                Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: onLike,
-                        child: Padding(
-                          padding: AppSpacing.paddingSm,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                userReaction == 'like' ? Icons.thumb_up : Icons.thumb_up_outlined,
-                                size: 18,
-                                color: userReaction == 'like' ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: AppSpacing.sm),
-                              Text(
-                                '${job.likes}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: userReaction == 'like' ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 1,
-                      height: 20,
-                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                    ),
-                    Expanded(
-                      child: InkWell(
-                        onTap: onDislike,
-                        child: Padding(
-                          padding: AppSpacing.paddingSm,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                userReaction == 'dislike' ? Icons.thumb_down : Icons.thumb_down_outlined,
-                                size: 18,
-                                color: userReaction == 'dislike' ? theme.colorScheme.tertiary : theme.colorScheme.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: AppSpacing.sm),
-                              Text(
-                                '${job.dislikes}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: userReaction == 'dislike' ? theme.colorScheme.tertiary : theme.colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: AppSpacing.lg),
+                Divider(
+                  color: theme.colorScheme.outline,
+                  height: 1,
                 ),
+                const SizedBox(height: AppSpacing.md),
+                _buildReactionRow(theme),
               ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(ThemeData theme) {
+    return Row(
+      children: [
+        _buildIconBadge(
+          theme,
+          Icons.location_on_rounded,
+          _getLocationTypeLabel(job.locationType),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        _buildIconBadge(
+          theme,
+          Icons.payments_rounded,
+          job.salary,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIconBadge(ThemeData theme, IconData icon, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+        const SizedBox(width: AppSpacing.xs),
+        Flexible(
+          child: Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSkillsWrap(ThemeData theme) {
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: job.expectedSkills.take(3).map((skill) {
+        return Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+          ),
+          child: Text(
+            skill,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+              fontWeight: FontWeight.w700,
+              fontSize: 10,
+              letterSpacing: 0.5,
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildReactionRow(ThemeData theme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        _buildReactionButton(
+          theme,
+          isSelected: userReaction == 'like',
+          icon: Icons.thumb_up_rounded,
+          selectedIcon: Icons.thumb_up_rounded,
+          count: job.likes,
+          onTap: onLike!,
+          color: theme.colorScheme.primary,
+        ),
+        const SizedBox(width: AppSpacing.md),
+        _buildReactionButton(
+          theme,
+          isSelected: userReaction == 'dislike',
+          icon: Icons.thumb_down_rounded,
+          selectedIcon: Icons.thumb_down_rounded,
+          count: job.dislikes,
+          onTap: onDislike!,
+          color: theme.colorScheme.error,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReactionButton(
+    ThemeData theme, {
+    required bool isSelected,
+    required IconData icon,
+    required IconData selectedIcon,
+    required int count,
+    required VoidCallback onTap,
+    required Color color,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? selectedIcon : icon,
+              size: 20,
+              color: isSelected ? color : theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Text(
+              '$count',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isSelected ? color : theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
     );

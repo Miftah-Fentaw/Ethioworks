@@ -9,6 +9,7 @@ class CustomButton extends StatelessWidget {
   final Color? backgroundColor;
   final Color? textColor;
   final IconData? icon;
+  final String? assetIcon;
 
   const CustomButton({
     super.key,
@@ -19,44 +20,38 @@ class CustomButton extends StatelessWidget {
     this.backgroundColor,
     this.textColor,
     this.icon,
+    this.assetIcon,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
+    // Common text style for both button types
+    final textStyle = theme.textTheme.labelLarge?.copyWith(
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.5,
+    );
+
     if (isOutlined) {
       return OutlinedButton(
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
           padding: AppSpacing.paddingMd,
-          side: BorderSide(color: backgroundColor ?? theme.colorScheme.primary, width: 1.5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+          side: BorderSide(
+            color: backgroundColor ?? theme.colorScheme.outline,
+            width: 1.5,
+          ),
+          shape: const StadiumBorder(),
+          foregroundColor: textColor ?? theme.colorScheme.primary,
         ),
         child: isLoading
-            ? SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(backgroundColor ?? theme.colorScheme.primary),
+            ? _buildLoader(backgroundColor ?? theme.colorScheme.primary)
+            : _buildContent(
+                textStyle: textStyle?.copyWith(
+                  color: textColor ?? theme.colorScheme.primary,
                 ),
-              )
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 20, color: backgroundColor ?? theme.colorScheme.primary),
-                    const SizedBox(width: AppSpacing.sm),
-                  ],
-                  Text(
-                    text,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: textColor ?? backgroundColor ?? theme.colorScheme.primary,
-                    ),
-                  ),
-                ],
+                iconColor: textColor ?? theme.colorScheme.primary,
               ),
       );
     }
@@ -67,34 +62,45 @@ class CustomButton extends StatelessWidget {
         backgroundColor: backgroundColor ?? theme.colorScheme.primary,
         foregroundColor: textColor ?? theme.colorScheme.onPrimary,
         padding: AppSpacing.paddingMd,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+        shape: const StadiumBorder(),
         elevation: 0,
       ),
       child: isLoading
-          ? SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(textColor ?? theme.colorScheme.onPrimary),
+          ? _buildLoader(textColor ?? theme.colorScheme.onPrimary)
+          : _buildContent(
+              textStyle: textStyle?.copyWith(
+                color: textColor ?? theme.colorScheme.onPrimary,
               ),
-            )
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, size: 20, color: textColor ?? theme.colorScheme.onPrimary),
-                  const SizedBox(width: AppSpacing.sm),
-                ],
-                Text(
-                  text,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: textColor ?? theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ],
+              iconColor: textColor ?? theme.colorScheme.onPrimary,
             ),
+    );
+  }
+
+  Widget _buildLoader(Color color) {
+    return SizedBox(
+      height: 20,
+      width: 20,
+      child: CircularProgressIndicator(
+        strokeWidth: 2,
+        valueColor: AlwaysStoppedAnimation<Color>(color),
+      ),
+    );
+  }
+
+  Widget _buildContent({TextStyle? textStyle, Color? iconColor}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (icon != null) ...[
+          Icon(icon, size: 18, color: iconColor),
+          const SizedBox(width: AppSpacing.sm),
+        ] else if (assetIcon != null) ...[
+          Image.asset(assetIcon!, width: 18, height: 18),
+          const SizedBox(width: AppSpacing.sm),
+        ],
+        Text(text, style: textStyle),
+      ],
     );
   }
 }

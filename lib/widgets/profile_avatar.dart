@@ -48,54 +48,43 @@ class ProfileAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: theme.colorScheme.primaryContainer,
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2), width: 1),
+        border: Border.all(
+          color: theme.colorScheme.outline,
+          width: 0.5,
+        ),
       ),
-      child: asset != null
-          ? ClipOval(
-              child: Image.asset(
+      child: ClipOval(
+        child: asset != null
+            ? Image.asset(
                 asset,
                 width: size,
                 height: size,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Center(
-                  child: Text(
-                    _getInitials(name),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w600,
-                      fontSize: size * 0.4,
-                    ),
-                  ),
-                ),
-              ),
-            )
-          : imageUrl != null && imageUrl!.isNotEmpty
-              ? ClipOval(
-                  child: Image.network(
+                errorBuilder: (context, error, stackTrace) =>
+                    _buildFallback(theme),
+              )
+            : imageUrl != null && imageUrl!.isNotEmpty
+                ? Image.network(
                     imageUrl!,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Center(
-                      child: Text(
-                        _getInitials(name),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: theme.colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.w600,
-                          fontSize: size * 0.4,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              : Center(
-                  child: Text(
-                    _getInitials(name),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w600,
-                      fontSize: size * 0.4,
-                    ),
-                  ),
-                ),
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildFallback(theme),
+                  )
+                : _buildFallback(theme),
+      ),
+    );
+  }
+
+  Widget _buildFallback(ThemeData theme) {
+    return Center(
+      child: Text(
+        _getInitials(name),
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: theme.colorScheme.onPrimaryContainer,
+          fontWeight: FontWeight.w600,
+          fontSize: size * 0.4,
+        ),
+      ),
     );
   }
 }
