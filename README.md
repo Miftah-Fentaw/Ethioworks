@@ -1,57 +1,97 @@
-# Ethioworks
+<p align="center">
+  <img src="assets/ethioworks.png" width="150" alt="EthioWorks Logo">
+</p>
 
-Ethioworks is a modern job portal application built with Flutter, designed to bridge the gap between job seekers and employers in Ethiopia. It provides a seamless platform for professionals to find opportunities and for companies to hire top talent.
+<h1 align="center">EthioWorks</h1>
 
-## Features
+<p align="center">
+  <b>A Modern, Responsive Job Matching Platform for Ethiopia</b>
+</p>
 
-### For Job Seekers
-- **Discover Opportunities**: Browse and search for jobs across various industries and locations.
-- **Company Insights**: Explore detailed company profiles, including active job listings and follower counts.
-- **Easy Application**: Apply for jobs directly within the app with a streamlined application form.
-- **Profile Management**: Maintain a professional profile to showcase skills and experience.
-- **Saved Jobs**: Keep track of interesting positions and follow favorite companies.
+---
 
-### For Employers
-- **Post Jobs**: Easily create and manage job listings with detailed requirements.
-- **Talent Acquisition**: Review applications, view candidate profiles, and manage the hiring process.
-- **Company Branding**: Build a company profile to attract potential candidates.
-- **Applicant Management**: centralized view of all applicants for posted positions.
+## 🌟 Overview
 
-## Tech Stack
+EthioWorks is a state-of-the-art job portal designed to bridge the gap between talented job seekers and leading employers in Ethiopia. Built with Flutter, the platform offers a seamless, high-performance experience across Mobile, Web, and Desktop, featuring a truly responsive design that adapts to any screen size.
 
-- **Frontend**: Flutter (Dart)
-- **State Management**: Provider
-- **Platform Support**: optimized for Web and Desktop (with mobile capabilities)
+## ✨ Key Features
 
-## Getting Started
+### 👤 For Job Seekers
+- **Dynamic Home Feed**: Discover the latest job openings tailored to your interests.
+- **Advanced Search & Filtering**: Find the perfect role by category, location, or job type.
+- **Easy Applications**: Apply to jobs with just a few taps and manage your application history.
+- **Company Profiles**: Explore detailed information about hiring companies.
+- **Premium UI**: Experience a modern, glassmorphic design that makes job hunting enjoyable.
 
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/Miftah-Fentaw/Ethioworks.git
-    cd Ethioworks
-    ```
+### 🏢 For Employers
+- **Job Management**: Post, edit, and manage job listings with ease.
+- **Applicant Tracking**: View and manage candidate profiles and their applications in a dedicated dashboard.
+- **Smart Sidebar**: Navigate through your recruitment tools with a modern, integrated sidebar on desktop.
+- **Real-time Stats**: Track your posting performance and applicant numbers at a glance.
 
-2.  **Install dependencies**
-    ```bash
-    flutter pub get
-    ```
+## 📱 Mobile Experience
 
-3.  **Run the application**
-    ```bash
-    flutter run -d chrome
-    ```
+The mobile application is optimized for on-the-go browsing, featuring a sleek bottom navigation bar and intuitive gestures.
 
-## Project Structure
+<p align="center">
+  <img src="assets/screenshots/mobile1.png" width="20%" />
+  <img src="assets/screenshots/mobile2.png" width="20%" />
+  <img src="assets/screenshots/mobile3.png" width="20%" />
+  <img src="assets/screenshots/mobile4.png" width="20%" />
+</p>
 
-- `lib/screens/web_and_desktop`: Contains the main UI screens for Web/Desktop.
-    - `auth`: Authentication screens (Sign In, Sign Up, Forgot Password).
-    - `job_seeker`: Screens specific to the Job Seeker role (Home, Job Details, Apply, Companies).
-    - `employer`: Screens specific to the Employer role (Post Job, Applicant Details, Dashboard).
-- `lib/providers`: State management handling logic for Auth, Jobs, and Applications.
-- `lib/models`: Data models for User, JobPost, Application, Employer, etc.
-- `lib/services`: Service layer for API/Database interactions.
-- `lib/widgets`: Reusable UI components.
+## 💻 Web & Desktop Experience
 
-## Contributing
+The web and desktop versions utilize the horizontal space to provide a comprehensive management interface for employers and an expansive browsing experience for seekers.
 
-Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.
+<p align="center">
+  <img src="assets/screenshots/wd1.png" width="45%" />
+  <img src="assets/screenshots/wd2.png" width="45%" />
+</p>
+<p align="center">
+  <img src="assets/screenshots/wd3.png" width="45%" />
+  <img src="assets/screenshots/wd4.png" width="45%" />
+</p>
+
+## 🔌 Tech Stack
+
+- **Framework**: [Flutter](https://flutter.dev) (Single codebase for all platforms)
+- **State Management**: [Provider](https://pub.dev/packages/provider)
+- **Backend**: [Firebase](https://firebase.google.com) (Authentication, Cloud Firestore, Storage)
+- **Design System**: Custom Vanilla CSS & Flutter Material 3
+- **Responsiveness**: Custom-built `ResponsiveLayout` for seamless window resizing.
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Flutter SDK installed on your machine.
+- A Firebase project configured for the application.
+
+### Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-username/EthioWorks.git
+   cd EthioWorks
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   flutter pub get
+   ```
+
+3. **Set up Firebase**:
+   - Place your `google-services.json` in `android/app/`.
+   - Place your `GoogleService-Info.plist` in `ios/Runner/`.
+   - Run `flutterfire configure` to update options.
+
+4. **Run the application**:
+   ```bash
+   flutter run
+   ```
+
+---
+
+<p align="center">
+  Built with ❤️ for the Ethiopian Tech Community
+</p>
