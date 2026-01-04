@@ -1,29 +1,22 @@
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 import 'package:ethioworks/models/feedback_model.dart';
 
 class FeedbackService {
-  static const String _feedbackKey = 'feedbacks';
-  
-  final _uuid = const Uuid();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<Feedback?> submitFeedback(Feedback feedback) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final feedbacks = await getAllFeedback();
-      
+      final docRef = _firestore.collection('feedbacks').doc();
       final newFeedback = feedback.copyWith(
-        id: _uuid.v4(),
+        id: docRef.id,
         createdAt: DateTime.now(),
       );
-      
-      feedbacks.add(newFeedback);
-      
-      await prefs.setString(_feedbackKey, jsonEncode(feedbacks.map((f) => f.toJson()).toList()));
-      
-      debugPrint('FeedbackService: Feedback submitted successfully');
+
+      await docRef.set(newFeedback.toJson());
+
+      debugPrint(
+          'FeedbackService: Feedback submitted successfully to Firestore');
       return newFeedback;
     } catch (e) {
       debugPrint('FeedbackService: Error submitting feedback: $e');
@@ -33,27 +26,12 @@ class FeedbackService {
 
   Future<List<Feedback>> getAllFeedback() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final feedbackJson = prefs.getString(_feedbackKey);
-      
-      if (feedbackJson == null || feedbackJson.isEmpty) {
-        return [];
-      }
+      final snapshot = await _firestore
+          .collection('feedbacks')
+          .orderBy('createdAt', descending: true)
+          .get();
 
-      final feedbackList = (jsonDecode(feedbackJson) as List)
-          .map((e) => e as Map<String, dynamic>)
-          .toList();
-      
-      final feedbacks = <Feedback>[];
-      for (final json in feedbackList) {
-        try {
-          feedbacks.add(Feedback.fromJson(json));
-        } catch (e) {
-          debugPrint('FeedbackService: Skipping corrupted feedback: $e');
-        }
-      }
-      
-      return feedbacks..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return snapshot.docs.map((doc) => Feedback.fromJson(doc.data())).toList();
     } catch (e) {
       debugPrint('FeedbackService: Error getting all feedback: $e');
       return [];

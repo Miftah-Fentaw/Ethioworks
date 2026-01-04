@@ -1,29 +1,19 @@
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ethioworks/models/job_seeker_model.dart';
 import 'package:ethioworks/models/employer_model.dart';
 import 'package:ethioworks/services/employer_service.dart';
 
 class JobSeekerService {
-  static const String _usersKey = 'users';
-  
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final _employerService = EmployerService();
 
   Future<JobSeeker?> getProfile(String id) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final usersJson = prefs.getString(_usersKey) ?? '[]';
-      final usersList = (jsonDecode(usersJson) as List).map((e) => e as Map<String, dynamic>).toList();
-      
-      final userJson = usersList.firstWhere(
-        (u) => u['id'] == id,
-        orElse: () => <String, dynamic>{},
-      );
-      
-      if (userJson.isEmpty) return null;
-      
-      return JobSeeker.fromJson(userJson);
+      final doc = await _firestore.collection('users').doc(id).get();
+      if (!doc.exists) return null;
+
+      return JobSeeker.fromJson(doc.data()!);
     } catch (e) {
       debugPrint('JobSeekerService: Error getting profile: $e');
       return null;
@@ -32,22 +22,13 @@ class JobSeekerService {
 
   Future<JobSeeker?> updateProfile(JobSeeker seeker) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final usersJson = prefs.getString(_usersKey) ?? '[]';
-      final usersList = (jsonDecode(usersJson) as List).map((e) => e as Map<String, dynamic>).toList();
-      
-      final index = usersList.indexWhere((u) => u['id'] == seeker.id);
-      if (index == -1) {
-        debugPrint('JobSeekerService: User not found');
-        return null;
-      }
-      
       final updatedSeeker = seeker.copyWith(updatedAt: DateTime.now());
-      usersList[index] = updatedSeeker.toJson();
-      
-      await prefs.setString(_usersKey, jsonEncode(usersList));
-      
-      debugPrint('JobSeekerService: Profile updated successfully');
+      await _firestore
+          .collection('users')
+          .doc(seeker.id)
+          .update(updatedSeeker.toJson());
+
+      debugPrint('JobSeekerService: Profile updated successfully in Firestore');
       return updatedSeeker;
     } catch (e) {
       debugPrint('JobSeekerService: Error updating profile: $e');
@@ -59,18 +40,21 @@ class JobSeekerService {
     try {
       final seeker = await getProfile(seekerId);
       if (seeker == null) return false;
-      
+
       if (seeker.followedCompanies.contains(employerId)) {
         debugPrint('JobSeekerService: Already following this company');
         return false;
       }
-      
-      final updatedFollowed = [...seeker.followedCompanies, employerId];
-      await updateProfile(seeker.copyWith(followedCompanies: updatedFollowed));
-      
+
+      await _firestore.collection('users').doc(seekerId).update({
+        'followedCompanies': FieldValue.arrayUnion([employerId]),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+
       await _employerService.incrementFollowers(employerId);
-      
-      debugPrint('JobSeekerService: Company followed successfully');
+
+      debugPrint(
+          'JobSeekerService: Company followed successfully in Firestore');
       return true;
     } catch (e) {
       debugPrint('JobSeekerService: Error following company: $e');
@@ -82,18 +66,21 @@ class JobSeekerService {
     try {
       final seeker = await getProfile(seekerId);
       if (seeker == null) return false;
-      
+
       if (!seeker.followedCompanies.contains(employerId)) {
         debugPrint('JobSeekerService: Not following this company');
         return false;
       }
-      
-      final updatedFollowed = seeker.followedCompanies.where((id) => id != employerId).toList();
-      await updateProfile(seeker.copyWith(followedCompanies: updatedFollowed));
-      
+
+      await _firestore.collection('users').doc(seekerId).update({
+        'followedCompanies': FieldValue.arrayRemove([employerId]),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+
       await _employerService.decrementFollowers(employerId);
-      
-      debugPrint('JobSeekerService: Company unfollowed successfully');
+
+      debugPrint(
+          'JobSeekerService: Company unfollowed successfully in Firestore');
       return true;
     } catch (e) {
       debugPrint('JobSeekerService: Error unfollowing company: $e');
@@ -105,7 +92,7 @@ class JobSeekerService {
     try {
       final seeker = await getProfile(seekerId);
       if (seeker == null) return [];
-      
+
       final companies = <Employer>[];
       for (final employerId in seeker.followedCompanies) {
         final employer = await _employerService.getProfile(employerId);
@@ -113,7 +100,7 @@ class JobSeekerService {
           companies.add(employer);
         }
       }
-      
+
       return companies;
     } catch (e) {
       debugPrint('JobSeekerService: Error getting followed companies: $e');

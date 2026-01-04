@@ -1,25 +1,17 @@
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ethioworks/models/employer_model.dart';
+import 'package:ethioworks/models/user_model.dart';
 
 class EmployerService {
-  static const String _usersKey = 'users';
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<Employer?> getProfile(String id) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final usersJson = prefs.getString(_usersKey) ?? '[]';
-      final usersList = (jsonDecode(usersJson) as List).map((e) => e as Map<String, dynamic>).toList();
-      
-      final userJson = usersList.firstWhere(
-        (u) => u['id'] == id,
-        orElse: () => <String, dynamic>{},
-      );
-      
-      if (userJson.isEmpty) return null;
-      
-      return Employer.fromJson(userJson);
+      final doc = await _firestore.collection('users').doc(id).get();
+      if (!doc.exists) return null;
+
+      return Employer.fromJson(doc.data()!);
     } catch (e) {
       debugPrint('EmployerService: Error getting profile: $e');
       return null;
@@ -28,22 +20,13 @@ class EmployerService {
 
   Future<Employer?> updateProfile(Employer employer) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final usersJson = prefs.getString(_usersKey) ?? '[]';
-      final usersList = (jsonDecode(usersJson) as List).map((e) => e as Map<String, dynamic>).toList();
-      
-      final index = usersList.indexWhere((u) => u['id'] == employer.id);
-      if (index == -1) {
-        debugPrint('EmployerService: User not found');
-        return null;
-      }
-      
       final updatedEmployer = employer.copyWith(updatedAt: DateTime.now());
-      usersList[index] = updatedEmployer.toJson();
-      
-      await prefs.setString(_usersKey, jsonEncode(usersList));
-      
-      debugPrint('EmployerService: Profile updated successfully');
+      await _firestore
+          .collection('users')
+          .doc(employer.id)
+          .update(updatedEmployer.toJson());
+
+      debugPrint('EmployerService: Profile updated successfully in Firestore');
       return updatedEmployer;
     } catch (e) {
       debugPrint('EmployerService: Error updating profile: $e');
@@ -53,11 +36,10 @@ class EmployerService {
 
   Future<void> incrementFollowers(String employerId) async {
     try {
-      final employer = await getProfile(employerId);
-      if (employer == null) return;
-      
-      await updateProfile(employer.copyWith(followers: employer.followers + 1));
-      
+      await _firestore.collection('users').doc(employerId).update({
+        'followers': FieldValue.increment(1),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
       debugPrint('EmployerService: Followers incremented');
     } catch (e) {
       debugPrint('EmployerService: Error incrementing followers: $e');
@@ -66,12 +48,10 @@ class EmployerService {
 
   Future<void> decrementFollowers(String employerId) async {
     try {
-      final employer = await getProfile(employerId);
-      if (employer == null) return;
-      
-      final newFollowers = employer.followers > 0 ? employer.followers - 1 : 0;
-      await updateProfile(employer.copyWith(followers: newFollowers));
-      
+      await _firestore.collection('users').doc(employerId).update({
+        'followers': FieldValue.increment(-1),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
       debugPrint('EmployerService: Followers decremented');
     } catch (e) {
       debugPrint('EmployerService: Error decrementing followers: $e');
@@ -80,22 +60,12 @@ class EmployerService {
 
   Future<List<Employer>> getAllEmployers() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final usersJson = prefs.getString(_usersKey) ?? '[]';
-      final usersList = (jsonDecode(usersJson) as List).map((e) => e as Map<String, dynamic>).toList();
-      
-      final employers = <Employer>[];
-      for (final json in usersList) {
-        try {
-          if (json['userType'] == 'employer') {
-            employers.add(Employer.fromJson(json));
-          }
-        } catch (e) {
-          debugPrint('EmployerService: Skipping corrupted employer: $e');
-        }
-      }
-      
-      return employers;
+      final snapshot = await _firestore
+          .collection('users')
+          .where('userType', isEqualTo: UserType.employer.name)
+          .get();
+
+      return snapshot.docs.map((doc) => Employer.fromJson(doc.data())).toList();
     } catch (e) {
       debugPrint('EmployerService: Error getting all employers: $e');
       return [];

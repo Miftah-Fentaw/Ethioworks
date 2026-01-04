@@ -1,38 +1,18 @@
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 import 'package:ethioworks/models/job_post_model.dart';
 
 class JobPostService {
-  static const String _jobsKey = 'jobs';
-  static const String _userJobReactionsKey = 'user_job_reactions';
-  
-  final _uuid = const Uuid();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<List<JobPost>> getAllJobs() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final jobsJson = prefs.getString(_jobsKey);
-      
-      if (jobsJson == null || jobsJson.isEmpty) {
-        return [];
-      }
+      final snapshot = await _firestore
+          .collection('jobs')
+          .orderBy('createdAt', descending: true)
+          .get();
 
-      final jobsList = (jsonDecode(jobsJson) as List)
-          .map((e) => e as Map<String, dynamic>)
-          .toList();
-      
-      final jobs = <JobPost>[];
-      for (final json in jobsList) {
-        try {
-          jobs.add(JobPost.fromJson(json));
-        } catch (e) {
-          debugPrint('JobPostService: Skipping corrupted job: $e');
-        }
-      }
-      
-      return jobs..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return snapshot.docs.map((doc) => JobPost.fromJson(doc.data())).toList();
     } catch (e) {
       debugPrint('JobPostService: Error getting all jobs: $e');
       return [];
@@ -41,8 +21,9 @@ class JobPostService {
 
   Future<JobPost?> getJobById(String id) async {
     try {
-      final jobs = await getAllJobs();
-      return jobs.firstWhere((job) => job.id == id);
+      final doc = await _firestore.collection('jobs').doc(id).get();
+      if (!doc.exists) return null;
+      return JobPost.fromJson(doc.data()!);
     } catch (e) {
       debugPrint('JobPostService: Job not found: $e');
       return null;
@@ -51,8 +32,14 @@ class JobPostService {
 
   Future<List<JobPost>> getJobsByEmployer(String employerId) async {
     try {
-      final jobs = await getAllJobs();
-      return jobs.where((job) => job.employerId == employerId).toList();
+      final snapshot = await _firestore
+          .collection('jobs')
+          .where('employerId', isEqualTo: employerId)
+          .get();
+
+      final jobs =
+          snapshot.docs.map((doc) => JobPost.fromJson(doc.data())).toList();
+      return jobs..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     } catch (e) {
       debugPrint('JobPostService: Error getting jobs by employer: $e');
       return [];
@@ -61,20 +48,16 @@ class JobPostService {
 
   Future<JobPost?> createJob(JobPost job) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final jobs = await getAllJobs();
-      
+      final docRef = _firestore.collection('jobs').doc();
       final newJob = job.copyWith(
-        id: job.id.isEmpty ? _uuid.v4() : job.id,
+        id: docRef.id,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      
-      jobs.add(newJob);
-      
-      await prefs.setString(_jobsKey, jsonEncode(jobs.map((j) => j.toJson()).toList()));
-      
-      debugPrint('JobPostService: Job created successfully');
+
+      await docRef.set(newJob.toJson());
+
+      debugPrint('JobPostService: Job created successfully in Firestore');
       return newJob;
     } catch (e) {
       debugPrint('JobPostService: Error creating job: $e');
@@ -84,21 +67,13 @@ class JobPostService {
 
   Future<JobPost?> updateJob(JobPost job) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final jobs = await getAllJobs();
-      
-      final index = jobs.indexWhere((j) => j.id == job.id);
-      if (index == -1) {
-        debugPrint('JobPostService: Job not found');
-        return null;
-      }
-      
       final updatedJob = job.copyWith(updatedAt: DateTime.now());
-      jobs[index] = updatedJob;
-      
-      await prefs.setString(_jobsKey, jsonEncode(jobs.map((j) => j.toJson()).toList()));
-      
-      debugPrint('JobPostService: Job updated successfully');
+      await _firestore
+          .collection('jobs')
+          .doc(job.id)
+          .update(updatedJob.toJson());
+
+      debugPrint('JobPostService: Job updated successfully in Firestore');
       return updatedJob;
     } catch (e) {
       debugPrint('JobPostService: Error updating job: $e');
@@ -108,14 +83,8 @@ class JobPostService {
 
   Future<bool> deleteJob(String id) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final jobs = await getAllJobs();
-      
-      jobs.removeWhere((job) => job.id == id);
-      
-      await prefs.setString(_jobsKey, jsonEncode(jobs.map((j) => j.toJson()).toList()));
-      
-      debugPrint('JobPostService: Job deleted successfully');
+      await _firestore.collection('jobs').doc(id).delete();
+      debugPrint('JobPostService: Job deleted successfully from Firestore');
       return true;
     } catch (e) {
       debugPrint('JobPostService: Error deleting job: $e');
@@ -125,38 +94,35 @@ class JobPostService {
 
   Future<void> likeJob(String jobId, String userId) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final reactionsJson = prefs.getString(_userJobReactionsKey) ?? '{}';
-      final reactions = jsonDecode(reactionsJson) as Map<String, dynamic>;
-      
-      final userReactions = reactions[userId] as Map<String, dynamic>? ?? {};
-      final previousReaction = userReactions[jobId] as String?;
-      
-      final jobs = await getAllJobs();
-      final jobIndex = jobs.indexWhere((j) => j.id == jobId);
-      if (jobIndex == -1) return;
-      
-      var job = jobs[jobIndex];
-      
-      if (previousReaction == 'like') {
-        userReactions.remove(jobId);
-        job = job.copyWith(likes: job.likes - 1);
-      } else {
-        userReactions[jobId] = 'like';
-        if (previousReaction == 'dislike') {
-          job = job.copyWith(likes: job.likes + 1, dislikes: job.dislikes - 1);
+      final reactionId = '${userId}_$jobId';
+      final reactionRef = _firestore.collection('reactions').doc(reactionId);
+      final jobRef = _firestore.collection('jobs').doc(jobId);
+
+      final reactionDoc = await reactionRef.get();
+      final previousReaction =
+          reactionDoc.exists ? reactionDoc.data()!['type'] as String? : null;
+
+      await _firestore.runTransaction((transaction) async {
+        if (previousReaction == 'like') {
+          // Unlike
+          transaction.delete(reactionRef);
+          transaction.update(jobRef, {'likes': FieldValue.increment(-1)});
         } else {
-          job = job.copyWith(likes: job.likes + 1);
+          // Like
+          transaction.set(
+              reactionRef, {'userId': userId, 'jobId': jobId, 'type': 'like'});
+          if (previousReaction == 'dislike') {
+            transaction.update(jobRef, {
+              'likes': FieldValue.increment(1),
+              'dislikes': FieldValue.increment(-1),
+            });
+          } else {
+            transaction.update(jobRef, {'likes': FieldValue.increment(1)});
+          }
         }
-      }
-      
-      reactions[userId] = userReactions;
-      await prefs.setString(_userJobReactionsKey, jsonEncode(reactions));
-      
-      jobs[jobIndex] = job;
-      await prefs.setString(_jobsKey, jsonEncode(jobs.map((j) => j.toJson()).toList()));
-      
-      debugPrint('JobPostService: Job liked');
+      });
+
+      debugPrint('JobPostService: Job liked/unliked');
     } catch (e) {
       debugPrint('JobPostService: Error liking job: $e');
     }
@@ -164,38 +130,35 @@ class JobPostService {
 
   Future<void> dislikeJob(String jobId, String userId) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final reactionsJson = prefs.getString(_userJobReactionsKey) ?? '{}';
-      final reactions = jsonDecode(reactionsJson) as Map<String, dynamic>;
-      
-      final userReactions = reactions[userId] as Map<String, dynamic>? ?? {};
-      final previousReaction = userReactions[jobId] as String?;
-      
-      final jobs = await getAllJobs();
-      final jobIndex = jobs.indexWhere((j) => j.id == jobId);
-      if (jobIndex == -1) return;
-      
-      var job = jobs[jobIndex];
-      
-      if (previousReaction == 'dislike') {
-        userReactions.remove(jobId);
-        job = job.copyWith(dislikes: job.dislikes - 1);
-      } else {
-        userReactions[jobId] = 'dislike';
-        if (previousReaction == 'like') {
-          job = job.copyWith(dislikes: job.dislikes + 1, likes: job.likes - 1);
+      final reactionId = '${userId}_$jobId';
+      final reactionRef = _firestore.collection('reactions').doc(reactionId);
+      final jobRef = _firestore.collection('jobs').doc(jobId);
+
+      final reactionDoc = await reactionRef.get();
+      final previousReaction =
+          reactionDoc.exists ? reactionDoc.data()!['type'] as String? : null;
+
+      await _firestore.runTransaction((transaction) async {
+        if (previousReaction == 'dislike') {
+          // Undislike
+          transaction.delete(reactionRef);
+          transaction.update(jobRef, {'dislikes': FieldValue.increment(-1)});
         } else {
-          job = job.copyWith(dislikes: job.dislikes + 1);
+          // Dislike
+          transaction.set(reactionRef,
+              {'userId': userId, 'jobId': jobId, 'type': 'dislike'});
+          if (previousReaction == 'like') {
+            transaction.update(jobRef, {
+              'dislikes': FieldValue.increment(1),
+              'likes': FieldValue.increment(-1),
+            });
+          } else {
+            transaction.update(jobRef, {'dislikes': FieldValue.increment(1)});
+          }
         }
-      }
-      
-      reactions[userId] = userReactions;
-      await prefs.setString(_userJobReactionsKey, jsonEncode(reactions));
-      
-      jobs[jobIndex] = job;
-      await prefs.setString(_jobsKey, jsonEncode(jobs.map((j) => j.toJson()).toList()));
-      
-      debugPrint('JobPostService: Job disliked');
+      });
+
+      debugPrint('JobPostService: Job disliked/undisliked');
     } catch (e) {
       debugPrint('JobPostService: Error disliking job: $e');
     }
@@ -203,12 +166,11 @@ class JobPostService {
 
   Future<String?> getUserReaction(String jobId, String userId) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final reactionsJson = prefs.getString(_userJobReactionsKey) ?? '{}';
-      final reactions = jsonDecode(reactionsJson) as Map<String, dynamic>;
-      
-      final userReactions = reactions[userId] as Map<String, dynamic>? ?? {};
-      return userReactions[jobId] as String?;
+      final reactionId = '${userId}_$jobId';
+      final doc =
+          await _firestore.collection('reactions').doc(reactionId).get();
+      if (!doc.exists) return null;
+      return doc.data()!['type'] as String?;
     } catch (e) {
       debugPrint('JobPostService: Error getting user reaction: $e');
       return null;
@@ -221,21 +183,25 @@ class JobPostService {
     List<String>? skills,
   }) async {
     try {
-      var jobs = await getAllJobs();
-      
+      Query query = _firestore.collection('jobs');
+
       if (locationType != null) {
-        jobs = jobs.where((job) => job.locationType == locationType).toList();
+        query = query.where('locationType', isEqualTo: locationType.name);
       }
-      
+
+      final snapshot = await query.get();
+      var jobs = snapshot.docs
+          .map((doc) => JobPost.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
+
       if (skills != null && skills.isNotEmpty) {
         jobs = jobs.where((job) {
-          return job.expectedSkills.any((skill) => 
-            skills.any((s) => skill.toLowerCase().contains(s.toLowerCase()))
-          );
+          return job.expectedSkills.any((skill) =>
+              skills.any((s) => skill.toLowerCase().contains(s.toLowerCase())));
         }).toList();
       }
-      
-      return jobs;
+
+      return jobs..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     } catch (e) {
       debugPrint('JobPostService: Error filtering jobs: $e');
       return [];

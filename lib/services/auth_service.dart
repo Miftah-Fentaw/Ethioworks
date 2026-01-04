@@ -1,17 +1,13 @@
-import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 import 'package:ethioworks/models/user_model.dart';
 import 'package:ethioworks/models/job_seeker_model.dart';
 import 'package:ethioworks/models/employer_model.dart';
 
 class AuthService {
-  static const String _currentUserKey = 'current_user';
-  static const String _usersKey = 'users';
-  static const String _passwordsKey = 'passwords';
-  
-  final _uuid = const Uuid();
+  final firebase_auth.FirebaseAuth _auth = firebase_auth.FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<User?> signUp({
     required String email,
@@ -21,23 +17,19 @@ class AuthService {
     String? companyOrPersonalName,
   }) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      
-      final usersJson = prefs.getString(_usersKey) ?? '[]';
-      final usersList = (jsonDecode(usersJson) as List).map((e) => e as Map<String, dynamic>).toList();
-      
-      if (usersList.any((u) => u['email'] == email)) {
-        debugPrint('AuthService: Email already exists');
-        return null;
-      }
+      final credential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final firebaseUser = credential.user;
+      if (firebaseUser == null) return null;
 
       final now = DateTime.now();
-      final userId = _uuid.v4();
-
       User newUser;
       if (userType == UserType.jobSeeker) {
         newUser = JobSeeker(
-          id: userId,
+          id: firebaseUser.uid,
           email: email,
           name: name ?? 'User',
           createdAt: now,
@@ -45,7 +37,7 @@ class AuthService {
         );
       } else {
         newUser = Employer(
-          id: userId,
+          id: firebaseUser.uid,
           email: email,
           companyOrPersonalName: companyOrPersonalName ?? 'Company',
           createdAt: now,
@@ -53,70 +45,56 @@ class AuthService {
         );
       }
 
-      usersList.add(newUser.toJson());
-      await prefs.setString(_usersKey, jsonEncode(usersList));
+      await _firestore
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .set(newUser.toJson());
 
-      final passwordsJson = prefs.getString(_passwordsKey) ?? '{}';
-      final passwordsMap = jsonDecode(passwordsJson) as Map<String, dynamic>;
-      passwordsMap[email] = password;
-      await prefs.setString(_passwordsKey, jsonEncode(passwordsMap));
-
-      await prefs.setString(_currentUserKey, jsonEncode(newUser.toJson()));
-      
-      debugPrint('AuthService: User signed up successfully');
+      debugPrint('AuthService: User signed up successfully with Firebase');
       return newUser;
     } catch (e) {
       debugPrint('AuthService: Error during signup: $e');
-      return null;
+      rethrow;
     }
   }
 
   Future<User?> login(String email, String password) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      
-      final passwordsJson = prefs.getString(_passwordsKey) ?? '{}';
-      final passwordsMap = jsonDecode(passwordsJson) as Map<String, dynamic>;
-      
-      if (passwordsMap[email] != password) {
-        debugPrint('AuthService: Invalid credentials');
-        return null;
-      }
-
-      final usersJson = prefs.getString(_usersKey) ?? '[]';
-      final usersList = (jsonDecode(usersJson) as List).map((e) => e as Map<String, dynamic>).toList();
-      
-      final userJson = usersList.firstWhere(
-        (u) => u['email'] == email,
-        orElse: () => <String, dynamic>{},
+      final credential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
-      if (userJson.isEmpty) {
-        debugPrint('AuthService: User not found');
-        return null;
-      }
+      final firebaseUser = credential.user;
+      if (firebaseUser == null) return null;
 
-      User user;
-      if (userJson['userType'] == UserType.jobSeeker.name) {
-        user = JobSeeker.fromJson(userJson);
-      } else {
-        user = Employer.fromJson(userJson);
-      }
-
-      await prefs.setString(_currentUserKey, jsonEncode(user.toJson()));
-      
-      debugPrint('AuthService: User logged in successfully');
-      return user;
+      return await getUserById(firebaseUser.uid);
     } catch (e) {
       debugPrint('AuthService: Error during login: $e');
-      return null;
+      rethrow;
+    }
+  }
+
+  Future<User?> getUserById(String id) async {
+    try {
+      final doc = await _firestore.collection('users').doc(id).get();
+      if (!doc.exists) return null;
+
+      final data = doc.data()!;
+      if (data['userType'] == UserType.jobSeeker.name) {
+        return JobSeeker.fromJson(data);
+      } else {
+        return Employer.fromJson(data);
+      }
+    } catch (e) {
+      debugPrint('AuthService: Error getting user by ID: $e');
+      rethrow;
     }
   }
 
   Future<void> logout() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_currentUserKey);
+      await _auth.signOut();
       debugPrint('AuthService: User logged out');
     } catch (e) {
       debugPrint('AuthService: Error during logout: $e');
@@ -125,18 +103,9 @@ class AuthService {
 
   Future<User?> getCurrentUser() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final userJson = prefs.getString(_currentUserKey);
-      
-      if (userJson == null) return null;
-
-      final userMap = jsonDecode(userJson) as Map<String, dynamic>;
-      
-      if (userMap['userType'] == UserType.jobSeeker.name) {
-        return JobSeeker.fromJson(userMap);
-      } else {
-        return Employer.fromJson(userMap);
-      }
+      final firebaseUser = _auth.currentUser;
+      if (firebaseUser == null) return null;
+      return await getUserById(firebaseUser.uid);
     } catch (e) {
       debugPrint('AuthService: Error getting current user: $e');
       return null;
@@ -145,19 +114,9 @@ class AuthService {
 
   Future<bool> resetPassword(String email) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final usersJson = prefs.getString(_usersKey) ?? '[]';
-      final usersList = (jsonDecode(usersJson) as List).map((e) => e as Map<String, dynamic>).toList();
-      
-      final userExists = usersList.any((u) => u['email'] == email);
-      
-      if (userExists) {
-        debugPrint('AuthService: Password reset email sent to $email');
-        return true;
-      }
-      
-      debugPrint('AuthService: Email not found');
-      return false;
+      await _auth.sendPasswordResetEmail(email: email);
+      debugPrint('AuthService: Password reset email sent');
+      return true;
     } catch (e) {
       debugPrint('AuthService: Error during password reset: $e');
       return false;
@@ -166,19 +125,8 @@ class AuthService {
 
   Future<void> updateCurrentUser(User user) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_currentUserKey, jsonEncode(user.toJson()));
-      
-      final usersJson = prefs.getString(_usersKey) ?? '[]';
-      final usersList = (jsonDecode(usersJson) as List).map((e) => e as Map<String, dynamic>).toList();
-      
-      final index = usersList.indexWhere((u) => u['id'] == user.id);
-      if (index != -1) {
-        usersList[index] = user.toJson();
-        await prefs.setString(_usersKey, jsonEncode(usersList));
-      }
-      
-      debugPrint('AuthService: User updated successfully');
+      await _firestore.collection('users').doc(user.id).update(user.toJson());
+      debugPrint('AuthService: User updated successfully in Firestore');
     } catch (e) {
       debugPrint('AuthService: Error updating user: $e');
     }
