@@ -2,6 +2,12 @@ import 'package:ethioworks/models/user_model.dart';
 import 'package:ethioworks/screens/web_and_desktop/employer/employer_root.dart';
 import 'package:ethioworks/screens/web_and_desktop/job_seeker/job_seeker_root.dart';
 import 'package:ethioworks/screens/web_and_desktop/auth/signin.dart';
+import 'package:ethioworks/screens/mobile/employer/employer_root.dart'
+    as mobile_employer;
+import 'package:ethioworks/screens/mobile/job_seeker/job_seeker_root.dart'
+    as mobile_seeker;
+import 'package:ethioworks/screens/mobile/auth/signin.dart' as mobile_signin;
+import 'package:ethioworks/widgets/responsive_layout.dart';
 import 'package:ethioworks/utils/validator.dart';
 import 'package:ethioworks/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
@@ -54,11 +60,21 @@ class _WebSignupScreenState extends State<WebSignupScreen> {
     if (success) {
       if (authProvider.isJobSeeker) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const JobSeekerRoot()),
+          MaterialPageRoute(
+            builder: (_) => const ResponsiveLayout(
+              mobile: mobile_seeker.JobSeekerRoot(),
+              desktop: JobSeekerRoot(),
+            ),
+          ),
         );
       } else {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const EmployerRoot()),
+          MaterialPageRoute(
+            builder: (_) => const ResponsiveLayout(
+              mobile: mobile_employer.EmployerRoot(),
+              desktop: EmployerRoot(),
+            ),
+          ),
         );
       }
     } else {
@@ -180,7 +196,7 @@ class _WebSignupScreenState extends State<WebSignupScreen> {
               ? 'Full Name'
               : 'Company/Personal Name',
           hint: _selectedUserType == UserType.jobSeeker
-              ? 'John Doe'
+              ? 'full name'
               : 'Company Name',
           controller: _nameController,
           prefixIcon: _selectedUserType == UserType.jobSeeker
@@ -191,7 +207,7 @@ class _WebSignupScreenState extends State<WebSignupScreen> {
         const SizedBox(height: AppSpacing.lg),
         CustomTextField(
           label: 'Email Address',
-          hint: 'your.email@example.com',
+          hint: 'example@gmail.com',
           controller: _emailController,
           keyboardType: TextInputType.emailAddress,
           prefixIcon: Icons.email_outlined,
@@ -242,11 +258,20 @@ class _WebSignupScreenState extends State<WebSignupScreen> {
                     if (authProvider.isJobSeeker) {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                            builder: (_) => const JobSeekerRoot()),
+                          builder: (_) => const ResponsiveLayout(
+                            mobile: mobile_seeker.JobSeekerRoot(),
+                            desktop: JobSeekerRoot(),
+                          ),
+                        ),
                       );
                     } else {
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => const EmployerRoot()),
+                        MaterialPageRoute(
+                          builder: (_) => const ResponsiveLayout(
+                            mobile: mobile_employer.EmployerRoot(),
+                            desktop: EmployerRoot(),
+                          ),
+                        ),
                       );
                     }
                   } else {
@@ -284,7 +309,13 @@ class _WebSignupScreenState extends State<WebSignupScreen> {
                 style: theme.textTheme.bodyMedium),
             TextButton(
               onPressed: () => Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const WebLoginScreen())),
+                MaterialPageRoute(
+                  builder: (_) => const ResponsiveLayout(
+                    mobile: mobile_signin.LoginScreen(),
+                    desktop: WebLoginScreen(),
+                  ),
+                ),
+              ),
               child: Text('Log In',
                   style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.primary,

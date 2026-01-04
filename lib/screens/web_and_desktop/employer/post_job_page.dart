@@ -1,4 +1,4 @@
-import 'package:ethioworks/screens/web_and_desktop/employer/employer_home_page.dart';
+import 'package:ethioworks/screens/web_and_desktop/employer/employer_root.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ethioworks/models/job_post_model.dart';
@@ -118,7 +118,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
         ),
       );
       //back to homepage
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const EmployerHomeScreen()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const EmployerRoot()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -150,7 +150,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
                 children: [
                   CustomTextField(
                     label: 'Job Title *',
-                    hint: 'e.g., Senior Flutter Developer',
+                    hint: 'e.g., Senior software Developer',
                     controller: _titleController,
                     validator: (value) =>
                         Validators.validateRequired(value, 'Job title'),
@@ -181,7 +181,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
                             () => _selectedLocationType = LocationType.remote),
                       ),
                       ChoiceChip(
-                        label: const Text('Permanent'),
+                        label: const Text('Hybrid'),
                         selected:
                             _selectedLocationType == LocationType.permanent,
                         onSelected: (selected) => setState(() =>
@@ -224,7 +224,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   CustomTextField(
                     label: 'Required Skills *',
-                    hint: 'Separate with commas: Flutter, Dart, Firebase',
+                    hint: 'Separate with commas: communication, teamwork, problem-solving',
                     controller: _skillsController,
                     maxLines: 2,
                     validator: (value) =>

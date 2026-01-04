@@ -1,6 +1,13 @@
 import 'package:ethioworks/screens/mobile/auth/signin.dart';
 import 'package:ethioworks/screens/mobile/employer/employer_root.dart';
 import 'package:ethioworks/screens/mobile/job_seeker/job_seeker_root.dart';
+import 'package:ethioworks/screens/web_and_desktop/job_seeker/job_seeker_root.dart'
+    as web_seeker;
+import 'package:ethioworks/screens/web_and_desktop/employer/employer_root.dart'
+    as web_employer;
+import 'package:ethioworks/screens/web_and_desktop/auth/signin.dart'
+    as web_signin;
+import 'package:ethioworks/widgets/responsive_layout.dart';
 import 'package:ethioworks/utils/validator.dart';
 import 'package:ethioworks/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
@@ -54,11 +61,21 @@ class _SignupScreenState extends State<SignupScreen> {
     if (success) {
       if (authProvider.isJobSeeker) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const JobSeekerRoot()),
+          MaterialPageRoute(
+            builder: (_) => const ResponsiveLayout(
+              mobile: JobSeekerRoot(),
+              desktop: web_seeker.JobSeekerRoot(),
+            ),
+          ),
         );
       } else {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const EmployerRoot()),
+          MaterialPageRoute(
+            builder: (_) => const ResponsiveLayout(
+              mobile: EmployerRoot(),
+              desktop: web_employer.EmployerRoot(),
+            ),
+          ),
         );
       }
     } else {
@@ -77,201 +94,78 @@ class _SignupScreenState extends State<SignupScreen> {
     final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: AppSpacing.paddingLg,
+          padding: AppSpacing.paddingXl,
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppSpacing.xl),
-                Icon(
-                  Icons.work_rounded,
-                  size: 70,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Create Account',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Join EthioWorks and explore opportunities',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  'I am a',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
+                _buildHeader(theme),
+                const SizedBox(height: AppSpacing.xxl),
+                _buildSectionHeader(theme, 'Account Type'),
                 const SizedBox(height: AppSpacing.md),
-                Container(
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    border: Border.all(
-                        color:
-                            theme.colorScheme.outline.withValues(alpha: 0.3)),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: InkWell(
-                          onTap: () => setState(
-                              () => _selectedUserType = UserType.jobSeeker),
-                          borderRadius: BorderRadius.circular(AppRadius.md),
-                          child: Container(
-                            padding: AppSpacing.paddingMd,
-                            decoration: BoxDecoration(
-                              color: _selectedUserType == UserType.jobSeeker
-                                  ? theme.colorScheme.primary
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(AppRadius.md),
-                            ),
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.person_search,
-                                  color: _selectedUserType == UserType.jobSeeker
-                                      ? theme.colorScheme.onPrimary
-                                      : theme.colorScheme.onSurfaceVariant,
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                                Text(
-                                  'Job Seeker',
-                                  style: theme.textTheme.labelLarge?.copyWith(
-                                    color: _selectedUserType ==
-                                            UserType.jobSeeker
-                                        ? theme.colorScheme.onPrimary
-                                        : theme.colorScheme.onSurfaceVariant,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: InkWell(
-                          onTap: () => setState(
-                              () => _selectedUserType = UserType.employer),
-                          borderRadius: BorderRadius.circular(AppRadius.md),
-                          child: Container(
-                            padding: AppSpacing.paddingMd,
-                            decoration: BoxDecoration(
-                              color: _selectedUserType == UserType.employer
-                                  ? theme.colorScheme.primary
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(AppRadius.md),
-                            ),
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.business,
-                                  color: _selectedUserType == UserType.employer
-                                      ? theme.colorScheme.onPrimary
-                                      : theme.colorScheme.onSurfaceVariant,
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                                Text(
-                                  'Employer',
-                                  style: theme.textTheme.labelLarge?.copyWith(
-                                    color: _selectedUserType ==
-                                            UserType.employer
-                                        ? theme.colorScheme.onPrimary
-                                        : theme.colorScheme.onSurfaceVariant,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
+                _buildUserTypeSelector(theme),
+                const SizedBox(height: AppSpacing.xxl),
+                _buildSectionHeader(theme, 'Personal Information'),
+                const SizedBox(height: AppSpacing.md),
                 CustomTextField(
                   label: _selectedUserType == UserType.jobSeeker
                       ? 'Full Name'
                       : 'Company/Personal Name',
                   hint: _selectedUserType == UserType.jobSeeker
-                      ? 'John Doe'
+                      ? 'full name'
                       : 'Company Name',
                   controller: _nameController,
                   prefixIcon: _selectedUserType == UserType.jobSeeker
-                      ? Icons.person_outline
-                      : Icons.business_outlined,
+                      ? Icons.person_rounded
+                      : Icons.business_rounded,
                   validator: Validators.validateName,
                 ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.xl),
                 CustomTextField(
                   label: 'Email Address',
-                  hint: 'your.email@example.com',
+                  hint: 'example@gmail.com',
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  prefixIcon: Icons.email_outlined,
+                  prefixIcon: Icons.email_rounded,
                   validator: Validators.validateEmail,
                 ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.xl),
                 CustomTextField(
                   label: 'Password',
                   hint: '••••••••',
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  prefixIcon: Icons.lock_outline,
+                  prefixIcon: Icons.lock_rounded,
                   validator: Validators.validatePassword,
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
+                          ? Icons.visibility_rounded
+                          : Icons.visibility_off_rounded,
                       color: theme.colorScheme.onSurfaceVariant,
+                      size: 20,
                     ),
                     onPressed: () =>
                         setState(() => _obscurePassword = !_obscurePassword),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: AppSpacing.xxl),
                 CustomButton(
                   text: 'Create Account',
                   onPressed: _handleSignup,
                   isLoading: authProvider.isLoading,
+                  icon: Icons.person_add_rounded,
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: theme.colorScheme.outline)),
-                    Padding(
-                      padding: AppSpacing.horizontalMd,
-                      child: Text(
-                        'OR',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: theme.colorScheme.outline)),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.xxl),
+                _buildDivider(theme),
+                const SizedBox(height: AppSpacing.xxl),
                 CustomButton(
                   text: 'Continue with Google',
-                  assetIcon: 'assets/google.png',
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -280,36 +174,186 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                   isOutlined: true,
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Already have an account? ',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                              builder: (_) => const LoginScreen()),
-                        );
-                      },
-                      child: Text(
-                        'Log In',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                const SizedBox(height: AppSpacing.xxl),
+                _buildFooter(theme),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildHeader(ThemeData theme) {
+    return Column(
+      children: [
+        Container(
+          padding: AppSpacing.paddingLg,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            shape: BoxShape.circle,
+            border: Border.all(color: theme.colorScheme.outline, width: 1),
+          ),
+          child: Icon(
+            Icons.work_rounded,
+            size: 40,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        Text(
+          'Join EthioWorks',
+          style: theme.textTheme.headlineLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            color: theme.colorScheme.onSurface,
+            letterSpacing: -1.5,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Create an account to get started.',
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(ThemeData theme, String title) {
+    return Text(
+      title,
+      style: theme.textTheme.labelLarge?.copyWith(
+        fontWeight: FontWeight.w900,
+        color: theme.colorScheme.onSurface,
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+
+  Widget _buildUserTypeSelector(ThemeData theme) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildTypeCard(
+            theme,
+            UserType.jobSeeker,
+            'Job Seeker',
+            Icons.person_search_rounded,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: _buildTypeCard(
+            theme,
+            UserType.employer,
+            'Employer',
+            Icons.business_rounded,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTypeCard(
+      ThemeData theme, UserType type, String label, IconData icon) {
+    final isSelected = _selectedUserType == type;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedUserType = type),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: AppSpacing.paddingLg,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.outline,
+            width: 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? theme.colorScheme.onPrimary
+                  : theme.colorScheme.onSurfaceVariant,
+              size: 24,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              label,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: isSelected
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.onSurfaceVariant,
+                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDivider(ThemeData theme) {
+    return Row(
+      children: [
+        Expanded(
+            child: Divider(color: theme.colorScheme.outline, thickness: 1)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Text(
+            'OR',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+        Expanded(
+            child: Divider(color: theme.colorScheme.outline, thickness: 1)),
+      ],
+    );
+  }
+
+  Widget _buildFooter(ThemeData theme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Already have an account? ',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => const ResponsiveLayout(
+                  mobile: LoginScreen(),
+                  desktop: web_signin.WebLoginScreen(),
+                ),
+              ),
+            );
+          },
+          child: Text(
+            'Log In',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

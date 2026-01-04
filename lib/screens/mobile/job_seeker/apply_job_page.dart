@@ -59,7 +59,11 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
 
     final portfolioLinks = _portfolioController.text.isEmpty
         ? <String>[]
-        : _portfolioController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+        : _portfolioController.text
+            .split(',')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
 
     final application = Application(
       id: '',
@@ -91,7 +95,8 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(applicationProvider.errorMessage ?? 'Failed to submit application'),
+          content: Text(applicationProvider.errorMessage ??
+              'Failed to submit application'),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -104,8 +109,15 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
     final applicationProvider = context.watch<ApplicationProvider>();
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        title: const Text('Apply for Job'),
+        title: Text(
+          'Submit Application',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: AppSpacing.paddingLg,
@@ -114,73 +126,129 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Applying for ${widget.job.title}',
-                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'at ${widget.job.companyName}',
-                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              _buildJobHeader(theme),
+              const SizedBox(height: AppSpacing.xxl),
+              _buildSectionHeader(theme, 'Personal Information'),
+              const SizedBox(height: AppSpacing.md),
+              CustomTextField(
+                label: 'Email Address',
+                hint: 'example@gmail.com',
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                prefixIcon: Icons.email_rounded,
+                validator: Validators.validateEmail,
               ),
               const SizedBox(height: AppSpacing.xl),
               CustomTextField(
-                label: 'Cover Letter *',
-                hint: 'Tell us why you are the perfect fit...',
-                controller: _coverLetterController,
-                maxLines: 6,
-                validator: (value) => Validators.validateRequired(value, 'Cover letter'),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              CustomTextField(
-                label: 'Resume Link *',
-                hint: 'https://drive.google.com/your-resume',
-                controller: _resumeLinkController,
-                keyboardType: TextInputType.url,
-                validator: (value) => Validators.validateRequired(value, 'Resume link'),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              CustomTextField(
-                label: 'Portfolio Links (optional)',
-                hint: 'https://portfolio.com, https://github.com/username',
-                controller: _portfolioController,
-                maxLines: 2,
-                keyboardType: TextInputType.url,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              CustomTextField(
-                label: 'Telegram Username *',
-                hint: '@yourusername',
-                controller: _telegramController,
-                validator: (value) => Validators.validateRequired(value, 'Telegram username'),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              CustomTextField(
-                label: 'Email Address *',
-                hint: 'your.email@example.com',
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                validator: Validators.validateEmail,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              CustomTextField(
-                label: 'Phone Number *',
+                label: 'Phone Number',
                 hint: '+251 9XX XXX XXX',
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                validator: (value) => Validators.validateRequired(value, 'Phone number'),
+                prefixIcon: Icons.phone_rounded,
+                validator: (value) =>
+                    Validators.validateRequired(value, 'Phone number'),
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              _buildSectionHeader(theme, 'Application Details'),
+              const SizedBox(height: AppSpacing.md),
+              CustomTextField(
+                label: 'Cover Letter',
+                hint: 'Tell us why you are the perfect fit...',
+                controller: _coverLetterController,
+                maxLines: 5,
+                validator: (value) =>
+                    Validators.validateRequired(value, 'Cover letter'),
               ),
               const SizedBox(height: AppSpacing.xl),
+              CustomTextField(
+                label: 'Resume Link',
+                hint: 'https://drive.google.com/your-resume',
+                controller: _resumeLinkController,
+                keyboardType: TextInputType.url,
+                prefixIcon: Icons.description_rounded,
+                validator: (value) =>
+                    Validators.validateRequired(value, 'Resume link'),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              CustomTextField(
+                label: 'Portfolio Links (Optional)',
+                hint: 'https://portfolio.com, https://github.com/...',
+                controller: _portfolioController,
+                maxLines: 2,
+                keyboardType: TextInputType.url,
+                prefixIcon: Icons.link_rounded,
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              CustomTextField(
+                label: 'Telegram Username',
+                hint: '@yourusername',
+                controller: _telegramController,
+                prefixIcon: Icons.alternate_email_rounded,
+                validator: (value) =>
+                    Validators.validateRequired(value, 'Telegram username'),
+              ),
+              const SizedBox(height: AppSpacing.xxl),
               CustomButton(
                 text: 'Submit Application',
-                icon: Icons.send,
+                icon: Icons.send_rounded,
                 onPressed: _submitApplication,
                 isLoading: applicationProvider.isLoading,
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.xl),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildJobHeader(ThemeData theme) {
+    return Container(
+      padding: AppSpacing.paddingLg,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: theme.colorScheme.outline, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Job Opportunity',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            widget.job.title,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 4.0),
+          Text(
+            widget.job.companyName,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(ThemeData theme, String title) {
+    return Text(
+      title,
+      style: theme.textTheme.labelLarge?.copyWith(
+        fontWeight: FontWeight.w900,
+        color: theme.colorScheme.onSurface,
+        letterSpacing: 0.5,
       ),
     );
   }

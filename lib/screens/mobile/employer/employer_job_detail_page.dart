@@ -15,7 +15,8 @@ class EmployerJobDetailScreen extends StatefulWidget {
   const EmployerJobDetailScreen({super.key, required this.jobId});
 
   @override
-  State<EmployerJobDetailScreen> createState() => _EmployerJobDetailScreenState();
+  State<EmployerJobDetailScreen> createState() =>
+      _EmployerJobDetailScreenState();
 }
 
 class _EmployerJobDetailScreenState extends State<EmployerJobDetailScreen> {
@@ -31,7 +32,7 @@ class _EmployerJobDetailScreenState extends State<EmployerJobDetailScreen> {
   Future<void> _loadJobDetails() async {
     final jobProvider = context.read<JobProvider>();
     final applicationProvider = context.read<ApplicationProvider>();
-    
+
     final job = await jobProvider.getJobById(widget.jobId);
     if (job != null) {
       await applicationProvider.loadApplicationsByJob(job.id);
@@ -47,12 +48,16 @@ class _EmployerJobDetailScreenState extends State<EmployerJobDetailScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Job'),
-        content: const Text('Are you sure you want to delete this job posting?'),
+        content:
+            const Text('Are you sure you want to delete this job posting?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            child: Text('Delete',
+                style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -72,23 +77,47 @@ class _EmployerJobDetailScreenState extends State<EmployerJobDetailScreen> {
 
     if (_job == null) {
       return Scaffold(
-        appBar: AppBar(),
+        backgroundColor: theme.colorScheme.background,
+        appBar: AppBar(
+          title: Text(
+            'Job Details',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.5,
+            ),
+          ),
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        title: const Text('Job Details'),
+        title: Text(
+          'Job Details',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
+        ),
         actions: [
-          IconButton(icon: const Icon(Icons.edit), onPressed: () async {
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => PostJobScreen(jobToEdit: _job)),
-            );
-            if (result == true) _loadJobDetails();
-          }),
-          IconButton(icon: const Icon(Icons.delete), onPressed: _deleteJob),
+          IconButton(
+            icon: Icon(Icons.edit_rounded, color: theme.colorScheme.onSurface),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => PostJobScreen(jobToEdit: _job)),
+              );
+              if (result == true) _loadJobDetails();
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.delete_rounded, color: theme.colorScheme.error),
+            onPressed: _deleteJob,
+          ),
+          const SizedBox(width: AppSpacing.sm),
         ],
       ),
       body: Column(
@@ -99,77 +128,142 @@ class _EmployerJobDetailScreenState extends State<EmployerJobDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      ProfileAvatar(imageUrl: _job!.companyProfilePic, name: _job!.companyName, size: 70, avatarType: AvatarType.company),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(_job!.title, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: AppSpacing.xs),
-                            Text(_job!.companyName, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Container(
-                    padding: AppSpacing.paddingMd,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildStat('👍 Likes', _job!.likes.toString(), theme),
-                        _buildStat('👎 Dislikes', _job!.dislikes.toString(), theme),
-                        _buildStat('📝 Applicants', _applicantsCount.toString(), theme),
-                      ],
+                  _buildHeader(theme),
+                  const SizedBox(height: AppSpacing.xxl),
+                  _buildStatsSection(theme),
+                  const SizedBox(height: AppSpacing.xxl),
+                  _buildSectionHeader(theme, 'Description'),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    _job!.description,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      height: 1.6,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
-                  Text('Description', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(_job!.description, style: theme.textTheme.bodyMedium),
                 ],
               ),
             ),
           ),
-          Container(
-            padding: AppSpacing.paddingLg,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              border: Border(top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2))),
-            ),
-            child: SafeArea(
-              child: CustomButton(
-                text: 'View Applicants ($_applicantsCount)',
-                icon: Icons.people,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => ApplicantsScreen(job: _job!)),
-                  );
-                },
-              ),
-            ),
-          ),
+          _buildBottomBar(theme),
         ],
       ),
     );
   }
 
-  Widget _buildStat(String label, String value, ThemeData theme) {
+  Widget _buildHeader(ThemeData theme) {
+    return Row(
+      children: [
+        ProfileAvatar(
+          imageUrl: _job!.companyProfilePic,
+          name: _job!.companyName,
+          size: 72,
+          avatarType: AvatarType.company,
+        ),
+        const SizedBox(width: AppSpacing.lg),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _job!.title,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 4.0),
+              Text(
+                _job!.companyName,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsSection(ThemeData theme) {
+    return Container(
+      padding: AppSpacing.paddingLg,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: theme.colorScheme.outline, width: 1),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatItem(
+              theme, 'Likes', _job!.likes.toString(), Icons.thumb_up_rounded),
+          _buildStatItem(theme, 'Dislikes', _job!.dislikes.toString(),
+              Icons.thumb_down_rounded),
+          _buildStatItem(theme, 'Applicants', _applicantsCount.toString(),
+              Icons.people_rounded),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(
+      ThemeData theme, String label, String value, IconData icon) {
     return Column(
       children: [
-        Text(value, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
+        Icon(icon, size: 20, color: theme.colorScheme.primary),
         const SizedBox(height: AppSpacing.xs),
-        Text(label, style: theme.textTheme.bodySmall),
+        Text(
+          value,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: -1,
+          ),
+        ),
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _buildSectionHeader(ThemeData theme, String title) {
+    return Text(
+      title,
+      style: theme.textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.w900,
+        letterSpacing: -0.2,
+      ),
+    );
+  }
+
+  Widget _buildBottomBar(ThemeData theme) {
+    return Container(
+      padding: AppSpacing.paddingLg,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border:
+            Border(top: BorderSide(color: theme.colorScheme.outline, width: 1)),
+      ),
+      child: SafeArea(
+        child: CustomButton(
+          text: 'View Applicants ($_applicantsCount)',
+          icon: Icons.people_rounded,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ApplicantsScreen(job: _job!)),
+            );
+          },
+        ),
+      ),
     );
   }
 }

@@ -1,4 +1,7 @@
 import 'package:ethioworks/utils/validator.dart';
+import 'package:ethioworks/screens/mobile/auth/signin.dart' as mobile_signin;
+import 'package:ethioworks/screens/web_and_desktop/auth/signin.dart';
+import 'package:ethioworks/widgets/responsive_layout.dart';
 import 'package:ethioworks/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,7 +13,8 @@ class WebForgotPasswordScreen extends StatefulWidget {
   const WebForgotPasswordScreen({super.key});
 
   @override
-  State<WebForgotPasswordScreen> createState() => _WebForgotPasswordScreenState();
+  State<WebForgotPasswordScreen> createState() =>
+      _WebForgotPasswordScreenState();
 }
 
 class _WebForgotPasswordScreenState extends State<WebForgotPasswordScreen> {
@@ -27,7 +31,8 @@ class _WebForgotPasswordScreenState extends State<WebForgotPasswordScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.resetPassword(_emailController.text.trim());
+    final success =
+        await authProvider.resetPassword(_emailController.text.trim());
 
     if (!mounted) return;
 
@@ -36,12 +41,20 @@ class _WebForgotPasswordScreenState extends State<WebForgotPasswordScreen> {
         context: context,
         builder: (_) => AlertDialog(
           title: const Text('Success'),
-          content: const Text('Password reset instructions have been sent to your email.'),
+          content: const Text(
+              'Password reset instructions have been sent to your email.'),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Pop dialog
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (_) => const ResponsiveLayout(
+                      mobile: mobile_signin.LoginScreen(),
+                      desktop: WebLoginScreen(),
+                    ),
+                  ),
+                );
               },
               child: const Text('OK'),
             ),
@@ -70,13 +83,15 @@ class _WebForgotPasswordScreenState extends State<WebForgotPasswordScreen> {
         const SizedBox(height: AppSpacing.lg),
         Text(
           'Forgot Password?',
-          style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.headlineMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
           "Don't worry! Enter your email address and we'll send you instructions to reset your password.",
-          style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          style: theme.textTheme.bodyLarge
+              ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.xxl),
@@ -97,10 +112,19 @@ class _WebForgotPasswordScreenState extends State<WebForgotPasswordScreen> {
         const SizedBox(height: AppSpacing.lg),
         Center(
           child: TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => const ResponsiveLayout(
+                  mobile: mobile_signin.LoginScreen(),
+                  desktop: WebLoginScreen(),
+                ),
+              ),
+            ),
             child: Text(
               'Back to Login',
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -113,8 +137,16 @@ class _WebForgotPasswordScreenState extends State<WebForgotPasswordScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
-          onPressed: () => Navigator.of(context).pop(),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface),
+          onPressed: () => Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => const ResponsiveLayout(
+                mobile: mobile_signin.LoginScreen(),
+                desktop: WebLoginScreen(),
+              ),
+            ),
+          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -133,7 +165,9 @@ class _WebForgotPasswordScreenState extends State<WebForgotPasswordScreen> {
                     child: Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 480),
-                        child: SingleChildScrollView(child: Form(key: _formKey, child: _buildFormContent())),
+                        child: SingleChildScrollView(
+                            child: Form(
+                                key: _formKey, child: _buildFormContent())),
                       ),
                     ),
                   ),
@@ -151,7 +185,11 @@ class _WebForgotPasswordScreenState extends State<WebForgotPasswordScreen> {
                           padding: EdgeInsets.symmetric(horizontal: 48),
                           child: Text(
                             'Get Back to\nYour Opportunities',
-                            style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: Colors.white, height: 1.3),
+                            style: TextStyle(
+                                fontSize: 42,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                height: 1.3),
                             textAlign: TextAlign.center,
                           ),
                         ),

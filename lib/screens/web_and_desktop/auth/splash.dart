@@ -1,10 +1,15 @@
+import 'package:ethioworks/screens/mobile/job_seeker/job_seeker_root.dart'
+    as mobile_seeker;
+import 'package:ethioworks/screens/mobile/employer/employer_root.dart'
+    as mobile_employer;
+import 'package:ethioworks/screens/mobile/auth/signin.dart' as mobile_signin;
 import 'package:ethioworks/screens/web_and_desktop/employer/employer_root.dart';
 import 'package:ethioworks/screens/web_and_desktop/job_seeker/job_seeker_root.dart';
 import 'package:ethioworks/screens/web_and_desktop/auth/signin.dart';
+import 'package:ethioworks/widgets/responsive_layout.dart';
+import 'package:ethioworks/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ethioworks/providers/auth_provider.dart';
-import 'package:ethioworks/theme.dart';
 
 class WebSplashScreen extends StatefulWidget {
   const WebSplashScreen({super.key});
@@ -13,7 +18,8 @@ class WebSplashScreen extends StatefulWidget {
   State<WebSplashScreen> createState() => _WebSplashScreenState();
 }
 
-class _WebSplashScreenState extends State<WebSplashScreen> with SingleTickerProviderStateMixin {
+class _WebSplashScreenState extends State<WebSplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
@@ -21,12 +27,16 @@ class _WebSplashScreenState extends State<WebSplashScreen> with SingleTickerProv
   void initState() {
     super.initState();
 
-    _controller = AnimationController(duration: const Duration(milliseconds: 1500), vsync: this);
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+    _controller = AnimationController(
+        duration: const Duration(milliseconds: 1500), vsync: this);
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
     _controller.forward();
 
-    _checkAuthAndNavigate();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAuthAndNavigate();
+    });
   }
 
   Future<void> _checkAuthAndNavigate() async {
@@ -39,12 +49,33 @@ class _WebSplashScreenState extends State<WebSplashScreen> with SingleTickerProv
 
     if (authProvider.isLoggedIn) {
       if (authProvider.isJobSeeker) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const JobSeekerRoot()));
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => const ResponsiveLayout(
+              mobile: mobile_seeker.JobSeekerRoot(),
+              desktop: JobSeekerRoot(),
+            ),
+          ),
+        );
       } else {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const EmployerRoot()));
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => const ResponsiveLayout(
+              mobile: mobile_employer.EmployerRoot(),
+              desktop: EmployerRoot(),
+            ),
+          ),
+        );
       }
     } else {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const WebLoginScreen()));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const ResponsiveLayout(
+            mobile: mobile_signin.LoginScreen(),
+            desktop: WebLoginScreen(),
+          ),
+        ),
+      );
     }
   }
 
@@ -63,7 +94,7 @@ class _WebSplashScreenState extends State<WebSplashScreen> with SingleTickerProv
         fit: StackFit.expand,
         children: [
           Image.asset(
-            'assets/splash.jpg', 
+            'assets/splash.jpg',
             fit: BoxFit.cover,
             color: Colors.black.withOpacity(0.4),
             colorBlendMode: BlendMode.darken,
@@ -87,7 +118,8 @@ class _WebSplashScreenState extends State<WebSplashScreen> with SingleTickerProv
                   const SizedBox(height: 16),
                   Text(
                     'Connect • Opportunity • Growth',
-                    style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white70),
+                    style: theme.textTheme.headlineMedium
+                        ?.copyWith(color: Colors.white70),
                   ),
                 ],
               ),

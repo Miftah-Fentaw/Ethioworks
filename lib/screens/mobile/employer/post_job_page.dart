@@ -26,7 +26,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
   final _rolesController = TextEditingController();
   final _skillsController = TextEditingController();
   final _educationController = TextEditingController();
-  
+
   LocationType _selectedLocationType = LocationType.remote;
 
   @override
@@ -66,15 +66,25 @@ class _PostJobScreenState extends State<PostJobScreen> {
 
     if (employer == null) return;
 
-    final roles = _rolesController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-    final skills = _skillsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    final roles = _rolesController.text
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+    final skills = _skillsController.text
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
 
     final job = JobPost(
       id: widget.jobToEdit?.id ?? '',
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       locationType: _selectedLocationType,
-      location: _locationController.text.isEmpty ? null : _locationController.text.trim(),
+      location: _locationController.text.isEmpty
+          ? null
+          : _locationController.text.trim(),
       salary: _salaryController.text.trim(),
       roles: roles,
       expectedSkills: skills,
@@ -100,7 +110,9 @@ class _PostJobScreenState extends State<PostJobScreen> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(widget.jobToEdit != null ? 'Job updated successfully!' : 'Job posted successfully!'),
+          content: Text(widget.jobToEdit != null
+              ? 'Job updated successfully!'
+              : 'Job posted successfully!'),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
@@ -121,8 +133,15 @@ class _PostJobScreenState extends State<PostJobScreen> {
     final jobProvider = context.watch<JobProvider>();
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        title: Text(widget.jobToEdit != null ? 'Edit Job' : 'Post a Job'),
+        title: Text(
+          widget.jobToEdit != null ? 'Edit Job' : 'Post a Job',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: AppSpacing.paddingLg,
@@ -133,90 +152,127 @@ class _PostJobScreenState extends State<PostJobScreen> {
             children: [
               CustomTextField(
                 label: 'Job Title *',
-                hint: 'e.g., Senior Flutter Developer',
+                hint: 'e.g., Software Engineer',
                 controller: _titleController,
-                validator: (value) => Validators.validateRequired(value, 'Job title'),
+                validator: (value) =>
+                    Validators.validateRequired(value, 'Job title'),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
               CustomTextField(
                 label: 'Job Description *',
                 hint: 'Describe the role and responsibilities...',
                 controller: _descriptionController,
                 maxLines: 6,
-                validator: (value) => Validators.validateRequired(value, 'Description'),
+                validator: (value) =>
+                    Validators.validateRequired(value, 'Description'),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
               Text(
                 'Location Type *',
-                style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface,
+                  letterSpacing: 0.5,
+                ),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Wrap(
-                spacing: AppSpacing.sm,
-                children: [
-                  ChoiceChip(
-                    label: const Text('Remote'),
-                    selected: _selectedLocationType == LocationType.remote,
-                    onSelected: (selected) => setState(() => _selectedLocationType = LocationType.remote),
-                  ),
-                  ChoiceChip(
-                    label: const Text('Permanent'),
-                    selected: _selectedLocationType == LocationType.permanent,
-                    onSelected: (selected) => setState(() => _selectedLocationType = LocationType.permanent),
-                  ),
-                  ChoiceChip(
-                    label: const Text('On-Site'),
-                    selected: _selectedLocationType == LocationType.onSite,
-                    onSelected: (selected) => setState(() => _selectedLocationType = LocationType.onSite),
-                  ),
-                ],
-              ),
+              const SizedBox(height: AppSpacing.md),
+              _buildLocationTypeSelector(theme),
               if (_selectedLocationType == LocationType.onSite) ...[
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.xl),
                 CustomTextField(
                   label: 'Specific Location',
                   hint: 'e.g., Addis Ababa, Ethiopia',
                   controller: _locationController,
                 ),
               ],
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
               CustomTextField(
                 label: 'Salary *',
                 hint: 'e.g., 50,000 - 70,000 ETB/month',
                 controller: _salaryController,
-                validator: (value) => Validators.validateRequired(value, 'Salary'),
+                validator: (value) =>
+                    Validators.validateRequired(value, 'Salary'),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
               CustomTextField(
                 label: 'Roles & Responsibilities *',
-                hint: 'Separate with commas: Design UI, Write code, Review PRs',
+                hint: 'Separate with commas: e.g., Design UI, Write code, Review PRs....',
                 controller: _rolesController,
                 maxLines: 3,
-                validator: (value) => Validators.validateRequired(value, 'Roles'),
+                validator: (value) =>
+                    Validators.validateRequired(value, 'Roles'),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
               CustomTextField(
                 label: 'Required Skills *',
-                hint: 'Separate with commas: Flutter, Dart, Firebase',
+                hint: 'Separate with commas: e.g., Communication, Teamwork, Problem-solving....',
                 controller: _skillsController,
                 maxLines: 2,
-                validator: (value) => Validators.validateRequired(value, 'Skills'),
+                validator: (value) =>
+                    Validators.validateRequired(value, 'Skills'),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
               CustomTextField(
                 label: 'Education Requirements *',
                 hint: "e.g., Bachelor's in Computer Science or equivalent",
                 controller: _educationController,
-                validator: (value) => Validators.validateRequired(value, 'Education'),
+                validator: (value) =>
+                    Validators.validateRequired(value, 'Education'),
               ),
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.xxl),
               CustomButton(
                 text: widget.jobToEdit != null ? 'Update Job' : 'Post Job',
-                icon: Icons.send,
+                icon: Icons.send_rounded,
                 onPressed: _submitJob,
                 isLoading: jobProvider.isLoading,
               ),
+              const SizedBox(height: AppSpacing.xl),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationTypeSelector(ThemeData theme) {
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: [
+        _buildLocationChip(theme, 'Remote', LocationType.remote),
+        _buildLocationChip(theme, 'Hybrid', LocationType.permanent),
+        _buildLocationChip(theme, 'On-Site', LocationType.onSite),
+      ],
+    );
+  }
+
+  Widget _buildLocationChip(ThemeData theme, String label, LocationType value) {
+    final isSelected = _selectedLocationType == value;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedLocationType = value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.outline,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: isSelected
+                ? theme.colorScheme.onPrimary
+                : theme.colorScheme.onSurface,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
           ),
         ),
       ),

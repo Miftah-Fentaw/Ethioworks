@@ -184,7 +184,7 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
                     const SizedBox(height: AppSpacing.lg),
                     CustomTextField(
                       label: 'Email Address *',
-                      hint: 'your.email@example.com',
+                      hint: 'example@gmail.com',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       validator: Validators.validateEmail,

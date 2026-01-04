@@ -4,6 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:ethioworks/providers/auth_provider.dart';
 import 'package:ethioworks/screens/mobile/auth/signin.dart';
 import 'package:ethioworks/screens/mobile/job_seeker/job_seeker_root.dart';
+import 'package:ethioworks/screens/web_and_desktop/job_seeker/job_seeker_root.dart'
+    as web_seeker;
+import 'package:ethioworks/screens/web_and_desktop/employer/employer_root.dart'
+    as web_employer;
+import 'package:ethioworks/screens/web_and_desktop/auth/signin.dart'
+    as web_signin;
+import 'package:ethioworks/widgets/responsive_layout.dart';
 import 'package:ethioworks/theme.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -13,49 +20,65 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    
+
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeIn),
     );
-    
+
     _controller.forward();
-    
+
     _checkAuthAndNavigate();
   }
 
   Future<void> _checkAuthAndNavigate() async {
     final authProvider = context.read<AuthProvider>();
     await authProvider.checkAuthStatus();
-    
+
     await Future.delayed(const Duration(seconds: 2));
-    
+
     if (!mounted) return;
-    
+
     if (authProvider.isLoggedIn) {
       if (authProvider.isJobSeeker) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const JobSeekerRoot()),
+          MaterialPageRoute(
+            builder: (_) => const ResponsiveLayout(
+              mobile: JobSeekerRoot(),
+              desktop: web_seeker.JobSeekerRoot(),
+            ),
+          ),
         );
       } else {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const EmployerRoot()),
+          MaterialPageRoute(
+            builder: (_) => const ResponsiveLayout(
+              mobile: EmployerRoot(),
+              desktop: web_employer.EmployerRoot(),
+            ),
+          ),
         );
       }
     } else {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        MaterialPageRoute(
+          builder: (_) => const ResponsiveLayout(
+            mobile: LoginScreen(),
+            desktop: web_signin.WebLoginScreen(),
+          ),
+        ),
       );
     }
   }

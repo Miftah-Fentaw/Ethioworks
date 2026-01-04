@@ -5,6 +5,7 @@ import 'package:ethioworks/providers/job_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:ethioworks/models/application_model.dart';
 import 'package:ethioworks/widgets/profile_avatar.dart';
+import 'package:ethioworks/screens/web_and_desktop/employer/applicant_detail_page.dart';
 
 class AllApplicantsScreen extends StatefulWidget {
   const AllApplicantsScreen({super.key});
@@ -78,7 +79,13 @@ class _AllApplicantsScreenState extends State<AllApplicantsScreen> {
                         subtitle: Text(a.email),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          // TODO: Navigate to detail
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ApplicantDetailScreen(application: a),
+                            ),
+                          );
                         },
                       ),
                     );

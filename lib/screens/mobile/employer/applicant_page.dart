@@ -31,79 +31,142 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
     final applications = applicationProvider.applications;
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        title: const Text('Applicants'),
+        title: Text(
+          'Applicants',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon:
+                Icon(Icons.search_rounded, color: theme.colorScheme.onSurface),
+            onPressed: () {},
+          ),
+          const SizedBox(width: AppSpacing.sm),
+        ],
       ),
       body: applicationProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : applications.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.inbox, size: 80, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-                      const SizedBox(height: AppSpacing.lg),
-                      Text(
-                        'No applications yet',
-                        style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                    ],
-                  ),
-                )
+              ? _buildEmptyState(theme)
               : ListView.builder(
-                  padding: AppSpacing.paddingMd,
+                  padding: AppSpacing.paddingLg,
                   itemCount: applications.length,
                   itemBuilder: (context, index) {
                     final application = applications[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: AppSpacing.md),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ApplicantDetailScreen(application: application),
-                            ),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                        child: Padding(
-                          padding: AppSpacing.paddingMd,
-                          child: Row(
-                            children: [
-                              ProfileAvatar(imageUrl: null, name: application.applicantName, size: 50, avatarType: AvatarType.jobSeeker),
-                              const SizedBox(width: AppSpacing.md),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      application.applicantName,
-                                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                                    ),
-                                    if (application.applicantTitle != null) ...[
-                                      const SizedBox(height: AppSpacing.xs),
-                                      Text(
-                                        application.applicantTitle!,
-                                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                                      ),
-                                    ],
-                                    const SizedBox(height: AppSpacing.xs),
-                                    Text(
-                                      application.email,
-                                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
+                    return _buildApplicantCard(context, theme, application);
                   },
                 ),
+    );
+  }
+
+  Widget _buildEmptyState(ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.inbox_rounded,
+                size: 64,
+                color: theme.colorScheme.primary.withValues(alpha: 0.5)),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Text(
+            'No applications yet',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Check back later for new applicants.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildApplicantCard(
+      BuildContext context, ThemeData theme, application) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: theme.colorScheme.outline, width: 1),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ApplicantDetailScreen(application: application),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: Padding(
+          padding: AppSpacing.paddingLg,
+          child: Row(
+            children: [
+              ProfileAvatar(
+                imageUrl: null,
+                name: application.applicantName,
+                size: 56,
+                avatarType: AvatarType.jobSeeker,
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      application.applicantName,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    if (application.applicantTitle != null) ...[
+                      const SizedBox(height: 4.0),
+                      Text(
+                        application.applicantTitle!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 4.0),
+                    Text(
+                      application.email,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded,
+                  color: theme.colorScheme.onSurfaceVariant),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

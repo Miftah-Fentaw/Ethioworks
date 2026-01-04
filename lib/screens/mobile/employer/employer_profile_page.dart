@@ -20,67 +20,146 @@ class EmployerProfileScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Company Profile')),
+      backgroundColor: theme.colorScheme.background,
+      appBar: AppBar(
+        title: Text(
+          'Company Profile',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
+        padding: AppSpacing.paddingLg,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: double.infinity,
-              padding: AppSpacing.paddingXl,
-              decoration: BoxDecoration(color: theme.colorScheme.primaryContainer),
+            Center(
               child: Column(
                 children: [
-                  ProfileAvatar(imageUrl: employer.profilePic, name: employer.companyOrPersonalName, size: 100, avatarType: AvatarType.employer),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(employer.companyOrPersonalName, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text('${employer.followers} followers', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  ProfileAvatar(
+                    imageUrl: employer.profilePic,
+                    name: employer.companyOrPersonalName,
+                    size: 112,
+                    avatarType: AvatarType.employer,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    employer.companyOrPersonalName,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${employer.followers} followers',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ],
               ),
             ),
-            Padding(
-              padding: AppSpacing.paddingLg,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (employer.description != null) ...[
-                    Text('About', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(employer.description!, style: theme.textTheme.bodyMedium),
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
-                  Row(
-                    children: [
-                      Icon(Icons.email, size: 20, color: theme.colorScheme.primary),
-                      const SizedBox(width: AppSpacing.md),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Email', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                          Text(employer.email, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  CustomButton(
-                    text: 'Logout',
-                    icon: Icons.logout,
-                    onPressed: () async {
-                      await authProvider.logout();
-                      if (!context.mounted) return;
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                        (route) => false,
-                      );
-                    },
-                    backgroundColor: theme.colorScheme.error,
-                  ),
-                ],
+            const SizedBox(height: AppSpacing.xxl),
+            if (employer.description != null) ...[
+              Text(
+                'About',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.2,
+                ),
               ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                employer.description!,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.6,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+            ],
+            Text(
+              'Contact Information',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.2,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _buildInfoRow(
+              theme,
+              icon: Icons.email_rounded,
+              label: 'Email',
+              value: employer.email,
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            CustomButton(
+              text: 'Logout',
+              icon: Icons.logout_rounded,
+              onPressed: () async {
+                await authProvider.logout();
+                if (!context.mounted) return;
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  (route) => false,
+                );
+              },
+              backgroundColor: theme.colorScheme.error,
+              textColor: theme.colorScheme.onError,
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(ThemeData theme,
+      {required IconData icon, required String label, required String value}) {
+    return Container(
+      padding: AppSpacing.paddingLg,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: theme.colorScheme.outline, width: 1),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: AppSpacing.paddingSm,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 20, color: theme.colorScheme.primary),
+          ),
+          const SizedBox(width: AppSpacing.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

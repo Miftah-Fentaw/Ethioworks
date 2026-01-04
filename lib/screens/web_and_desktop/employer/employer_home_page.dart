@@ -38,43 +38,63 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
     final jobs = jobProvider.jobs;
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
+        titleSpacing: AppSpacing.lg,
         title: Row(
           children: [
-            Icon(Icons.work_rounded,
-                color: theme.colorScheme.primary, size: 28),
-            const SizedBox(width: AppSpacing.sm),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Icon(Icons.work_rounded,
+                  color: theme.colorScheme.primary, size: 24),
+            ),
+            const SizedBox(width: AppSpacing.md),
             Text(
               'EthioWorks',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
               ),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: ProfileAvatar(
-              imageUrl: employer?.profilePic,
-              name: employer?.companyOrPersonalName ?? 'Company',
-              size: 32,
-              avatarType: AvatarType.employer,
-            ),
-            onPressed: () {
+            icon:
+                Icon(Icons.search_rounded, color: theme.colorScheme.onSurface),
+            onPressed: () {},
+            tooltip: 'Search Posts',
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          InkWell(
+            onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (_) => const EmployerProfileScreen()),
               );
             },
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: ProfileAvatar(
+                imageUrl: employer?.profilePic,
+                name: employer?.companyOrPersonalName ?? 'Company',
+                size: 36,
+                avatarType: AvatarType.employer,
+              ),
+            ),
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.lg),
         ],
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
+          constraints: const BoxConstraints(maxWidth: 1000),
           child: RefreshIndicator(
             onRefresh: () async {
               if (employer != null) {
@@ -84,47 +104,27 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
             child: jobProvider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : jobs.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.post_add,
-                                size: 80,
-                                color: theme.colorScheme.onSurfaceVariant
-                                    .withValues(alpha: 0.5)),
-                            const SizedBox(height: AppSpacing.lg),
-                            Text(
-                              'No job postings yet',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Text(
-                              'Tap + to create your first job post',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
+                    ? _buildEmptyState(theme)
                     : ListView.builder(
-                        padding: AppSpacing.paddingMd,
+                        padding: AppSpacing.paddingLg,
                         itemCount: jobs.length,
                         itemBuilder: (context, index) {
                           final job = jobs[index];
-                          return JobCard(
-                            job: job,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      EmployerJobDetailScreen(jobId: job.id),
-                                ),
-                              );
-                            },
+                          return Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: AppSpacing.md),
+                            child: JobCard(
+                              job: job,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        EmployerJobDetailScreen(jobId: job.id),
+                                  ),
+                                );
+                              },
+                            ),
                           );
                         },
                       ),
@@ -141,10 +141,51 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
             context.read<JobProvider>().loadEmployerJobs(employer.id);
           }
         },
-        icon: const Icon(Icons.add),
-        label: const Text('Post Job'),
+        icon: const Icon(Icons.add_rounded),
+        label: Text(
+          'Post Job',
+          style: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.5,
+          ),
+        ),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.xxl),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.post_add_rounded,
+                size: 64,
+                color: theme.colorScheme.primary.withValues(alpha: 0.5)),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Text(
+            'No job postings yet',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Tap "Post Job" to create your first opening.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
   }

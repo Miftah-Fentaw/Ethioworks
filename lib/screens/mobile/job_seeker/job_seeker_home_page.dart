@@ -75,76 +75,66 @@ class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
     _loadUserReactions(jobs);
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        title: Row(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.work_rounded, color: theme.colorScheme.primary, size: 28),
-            const SizedBox(width: AppSpacing.sm),
             Text(
               'EthioWorks',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.primary,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: theme.colorScheme.onSurface,
+                letterSpacing: -1,
+              ),
+            ),
+            Text(
+              'Find your dream job',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.filter_list, color: theme.colorScheme.onSurface),
-            onPressed: _showFilterDialog,
+          _buildActionButton(
+            theme,
+            icon: Icons.tune_rounded,
+            onTap: _showFilterDialog,
           ),
-          IconButton(
-            icon: ProfileAvatar(
-              imageUrl: seeker?.profilePic,
-              name: seeker?.name ?? 'User',
-              size: 32,
-              avatarType: AvatarType.jobSeeker,
-            ),
-            onPressed: () {
+          const SizedBox(width: AppSpacing.sm),
+          GestureDetector(
+            onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const SeekerProfileScreen()),
               );
             },
+            child: ProfileAvatar(
+              imageUrl: seeker?.profilePic,
+              name: seeker?.name ?? 'User',
+              size: 40,
+              avatarType: AvatarType.jobSeeker,
+            ),
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.md),
         ],
       ),
       body: RefreshIndicator(
+        color: theme.colorScheme.primary,
+        backgroundColor: theme.colorScheme.surface,
         onRefresh: () => context.read<JobProvider>().loadJobs(),
         child: jobProvider.isLoading
             ? const Center(child: CircularProgressIndicator())
             : jobs.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.work_off, size: 80, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-                        const SizedBox(height: AppSpacing.lg),
-                        Text(
-                          'No jobs available',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          'Check back later for new opportunities',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
+                ? _buildEmptyState(theme)
                 : ListView.builder(
                     padding: AppSpacing.paddingMd,
                     itemCount: jobs.length,
                     itemBuilder: (context, index) {
                       final job = jobs[index];
-                      final userId = authProvider.currentUser?.id ?? '';
-                      
+
                       return JobCard(
                         job: job,
                         userReaction: _userReactions[job.id],
@@ -157,18 +147,78 @@ class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
                           );
                         },
                         onLike: () async {
+                          final userId = authProvider.currentUser?.id ?? '';
                           await jobProvider.likeJob(job.id, userId);
-                          final reaction = await jobProvider.getUserReaction(job.id, userId);
+                          final reaction =
+                              await jobProvider.getUserReaction(job.id, userId);
                           setState(() => _userReactions[job.id] = reaction);
                         },
                         onDislike: () async {
+                          final userId = authProvider.currentUser?.id ?? '';
                           await jobProvider.dislikeJob(job.id, userId);
-                          final reaction = await jobProvider.getUserReaction(job.id, userId);
+                          final reaction =
+                              await jobProvider.getUserReaction(job.id, userId);
                           setState(() => _userReactions[job.id] = reaction);
                         },
                       );
                     },
                   ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(ThemeData theme,
+      {required IconData icon, required VoidCallback onTap}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        shape: BoxShape.circle,
+        border: Border.all(color: theme.colorScheme.outline, width: 1),
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: theme.colorScheme.onSurface, size: 20),
+        onPressed: onTap,
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(ThemeData theme) {
+    return Center(
+      child: Padding(
+        padding: AppSpacing.paddingXl,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: AppSpacing.paddingXl,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.search_off_rounded,
+                size: 64,
+                color: theme.colorScheme.primary.withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            Text(
+              'No jobs found',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'We couldn\'t find any jobs matching your criteria. Try adjusting your filters or check back later.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -203,101 +253,128 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
       ),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: AppSpacing.paddingLg,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Filter Jobs',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.xl,
+        top: AppSpacing.md,
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.outline,
+                borderRadius: BorderRadius.circular(2),
               ),
-              const SizedBox(height: AppSpacing.lg),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
               Text(
-                'Location Type',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                'Filters',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
                 ),
               ),
-              const SizedBox(height: AppSpacing.md),
-              Wrap(
-                spacing: AppSpacing.sm,
-                children: [
-                  FilterChip(
-                    label: const Text('Remote'),
-                    selected: _tempLocationType == LocationType.remote,
-                    onSelected: (selected) {
-                      setState(() {
-                        _tempLocationType = selected ? LocationType.remote : null;
-                      });
-                    },
+              TextButton(
+                onPressed: widget.onClearFilters,
+                child: Text(
+                  'Reset All',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
                   ),
-                  FilterChip(
-                    label: const Text('Permanent'),
-                    selected: _tempLocationType == LocationType.permanent,
-                    onSelected: (selected) {
-                      setState(() {
-                        _tempLocationType = selected ? LocationType.permanent : null;
-                      });
-                    },
-                  ),
-                  FilterChip(
-                    label: const Text('On-Site'),
-                    selected: _tempLocationType == LocationType.onSite,
-                    onSelected: (selected) {
-                      setState(() {
-                        _tempLocationType = selected ? LocationType.onSite : null;
-                      });
-                    },
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: AppSpacing.xl),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: widget.onClearFilters,
-                      style: OutlinedButton.styleFrom(
-                        padding: AppSpacing.paddingMd,
-                      ),
-                      child: const Text('Clear All'),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton(
-                      onPressed: () => widget.onApplyFilters(_tempLocationType),
-                      style: ElevatedButton.styleFrom(
-                        padding: AppSpacing.paddingMd,
-                        backgroundColor: theme.colorScheme.primary,
-                        foregroundColor: theme.colorScheme.onPrimary,
-                      ),
-                      child: const Text('Apply Filters'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
             ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          _buildFilterSection(
+            theme,
+            title: 'Location Type',
+            child: Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                _buildFilterChip(theme, 'Remote', LocationType.remote),
+                _buildFilterChip(theme, 'Permanent', LocationType.permanent),
+                _buildFilterChip(theme, 'On-Site', LocationType.onSite),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+          ElevatedButton(
+            onPressed: () => widget.onApplyFilters(_tempLocationType),
+            child: const Text('Apply Filters'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterSection(ThemeData theme,
+      {required String title, required Widget child}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        child,
+      ],
+    );
+  }
+
+  Widget _buildFilterChip(ThemeData theme, String label, LocationType value) {
+    final isSelected = _tempLocationType == value;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _tempLocationType = isSelected ? null : value;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.outline,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: isSelected
+                ? theme.colorScheme.onPrimary
+                : theme.colorScheme.onSurface,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
           ),
         ),
       ),

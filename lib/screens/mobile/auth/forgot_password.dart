@@ -1,4 +1,8 @@
 import 'package:ethioworks/utils/validator.dart';
+import 'package:ethioworks/screens/mobile/auth/signin.dart';
+import 'package:ethioworks/screens/web_and_desktop/auth/signin.dart'
+    as web_signin;
+import 'package:ethioworks/widgets/responsive_layout.dart';
 import 'package:ethioworks/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,7 +31,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.resetPassword(_emailController.text.trim());
+    final success =
+        await authProvider.resetPassword(_emailController.text.trim());
 
     if (!mounted) return;
 
@@ -36,12 +41,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Success'),
-          content: const Text('Password reset instructions have been sent to your email.'),
+          content: const Text(
+              'Password reset instructions have been sent to your email.'),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Pop dialog
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (_) => const ResponsiveLayout(
+                      mobile: LoginScreen(),
+                      desktop: web_signin.WebLoginScreen(),
+                    ),
+                  ),
+                );
               },
               child: const Text('OK'),
             ),
@@ -64,67 +77,58 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
-          onPressed: () => Navigator.of(context).pop(),
+        title: Text(
+          'Reset Password',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: AppSpacing.paddingLg,
+          padding: AppSpacing.paddingXl,
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppSpacing.xl),
-                Icon(
-                  Icons.lock_reset,
-                  size: 80,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Forgot Password?',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  "Don't worry! Enter your email address and we'll send you instructions to reset your password.",
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                _buildHeader(theme),
                 const SizedBox(height: AppSpacing.xxl),
                 CustomTextField(
                   label: 'Email Address',
-                  hint: 'your.email@example.com',
+                  hint: 'example@gmail.com',
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  prefixIcon: Icons.email_outlined,
+                  prefixIcon: Icons.email_rounded,
                   validator: Validators.validateEmail,
                 ),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: AppSpacing.xxl),
                 CustomButton(
                   text: 'Send Reset Link',
                   onPressed: _handleResetPassword,
                   isLoading: authProvider.isLoading,
+                  icon: Icons.send_rounded,
                 ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.xl),
                 Center(
                   child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (_) => const ResponsiveLayout(
+                          mobile: LoginScreen(),
+                          desktop: web_signin.WebLoginScreen(),
+                        ),
+                      ),
+                    ),
                     child: Text(
                       'Back to Login',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -134,6 +138,44 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildHeader(ThemeData theme) {
+    return Column(
+      children: [
+        Container(
+          padding: AppSpacing.paddingLg,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            shape: BoxShape.circle,
+            border: Border.all(color: theme.colorScheme.outline, width: 1),
+          ),
+          child: Icon(
+            Icons.lock_reset_rounded,
+            size: 48,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        Text(
+          'Forgot Password?',
+          style: theme.textTheme.headlineLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            color: theme.colorScheme.onSurface,
+            letterSpacing: -1.5,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          "Enter your email and we'll send you instructions.",
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }

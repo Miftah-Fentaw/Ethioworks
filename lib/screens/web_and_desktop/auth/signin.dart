@@ -1,5 +1,11 @@
 import 'package:ethioworks/screens/web_and_desktop/employer/employer_root.dart';
 import 'package:ethioworks/screens/web_and_desktop/job_seeker/job_seeker_root.dart';
+import 'package:ethioworks/screens/mobile/employer/employer_root.dart'
+    as mobile_employer;
+import 'package:ethioworks/screens/mobile/job_seeker/job_seeker_root.dart'
+    as mobile_seeker;
+import 'package:ethioworks/screens/mobile/auth/signup.dart' as mobile_signup;
+import 'package:ethioworks/widgets/responsive_layout.dart';
 import 'package:ethioworks/screens/web_and_desktop/auth/forgot_password.dart';
 import 'package:ethioworks/screens/web_and_desktop/auth/signup.dart';
 import 'package:ethioworks/utils/validator.dart';
@@ -44,11 +50,21 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
     if (success) {
       if (authProvider.isJobSeeker) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const JobSeekerRoot()),
+          MaterialPageRoute(
+            builder: (_) => const ResponsiveLayout(
+              mobile: mobile_seeker.JobSeekerRoot(),
+              desktop: JobSeekerRoot(),
+            ),
+          ),
         );
       } else {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const EmployerRoot()),
+          MaterialPageRoute(
+            builder: (_) => const ResponsiveLayout(
+              mobile: mobile_employer.EmployerRoot(),
+              desktop: EmployerRoot(),
+            ),
+          ),
         );
       }
     } else {
@@ -94,7 +110,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
         const SizedBox(height: AppSpacing.xxl),
         CustomTextField(
           label: 'Email Address',
-          hint: 'your.email@example.com',
+          hint: 'example@gmail.com',
           controller: _emailController,
           keyboardType: TextInputType.emailAddress,
           prefixIcon: Icons.email_outlined,
@@ -172,11 +188,20 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                     if (authProvider.isJobSeeker) {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                            builder: (_) => const JobSeekerRoot()),
+                          builder: (_) => const ResponsiveLayout(
+                            mobile: mobile_seeker.JobSeekerRoot(),
+                            desktop: JobSeekerRoot(),
+                          ),
+                        ),
                       );
                     } else {
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => const EmployerRoot()),
+                        MaterialPageRoute(
+                          builder: (_) => const ResponsiveLayout(
+                            mobile: mobile_employer.EmployerRoot(),
+                            desktop: EmployerRoot(),
+                          ),
+                        ),
                       );
                     }
                   } else {
@@ -214,7 +239,12 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const WebSignupScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const ResponsiveLayout(
+                      mobile: mobile_signup.SignupScreen(),
+                      desktop: WebSignupScreen(),
+                    ),
+                  ),
                 );
               },
               child: Text(
@@ -283,7 +313,6 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                         'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
                         fit: BoxFit.cover,
                       ),
-                      
                       Center(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 48),

@@ -20,79 +20,163 @@ class SeekerProfileScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      backgroundColor: theme.colorScheme.background,
+      appBar: AppBar(
+        title: Text(
+          'My Profile',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
+        padding: AppSpacing.paddingLg,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: double.infinity,
-              padding: AppSpacing.paddingXl,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
-              ),
+            Center(
               child: Column(
                 children: [
-                  ProfileAvatar(imageUrl: seeker.profilePic, name: seeker.name, size: 100, avatarType: AvatarType.jobSeeker),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(seeker.name, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  ProfileAvatar(
+                    imageUrl: seeker.profilePic,
+                    name: seeker.name,
+                    size: 112,
+                    avatarType: AvatarType.jobSeeker,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    seeker.name,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
                   if (seeker.title != null) ...[
                     const SizedBox(height: AppSpacing.xs),
-                    Text(seeker.title!, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                    Text(
+                      seeker.title!,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                 ],
               ),
             ),
-            Padding(
-              padding: AppSpacing.paddingLg,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (seeker.about != null) ...[
-                    Text('About', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(seeker.about!, style: theme.textTheme.bodyMedium),
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
-                  _buildInfoRow(Icons.email, 'Email', seeker.email, theme),
-                  if (seeker.phoneNo != null) _buildInfoRow(Icons.phone, 'Phone', seeker.phoneNo!, theme),
-                  const SizedBox(height: AppSpacing.sm),
-                  _buildInfoRow(Icons.business, 'Following', '${seeker.followedCompanies.length} companies', theme),
-                  const SizedBox(height: AppSpacing.xl),
-                  CustomButton(
-                    text: 'Logout',
-                    icon: Icons.logout,
-                    onPressed: () async {
-                      await authProvider.logout();
-                      if (!context.mounted) return;
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                        (route) => false,
-                      );
-                    },
-                    backgroundColor: theme.colorScheme.error,
-                  ),
-                ],
+            const SizedBox(height: AppSpacing.xxl),
+            if (seeker.about != null) ...[
+              Text(
+                'About Me',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                seeker.about!,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.6,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+            ],
+            Text(
+              'Personal Information',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.2,
               ),
             ),
+            const SizedBox(height: AppSpacing.md),
+            _buildInfoRow(
+              theme,
+              icon: Icons.email_rounded,
+              label: 'Email',
+              value: seeker.email,
+            ),
+            if (seeker.phoneNo != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              _buildInfoRow(
+                theme,
+                icon: Icons.phone_rounded,
+                label: 'Phone',
+                value: seeker.phoneNo!,
+              ),
+            ],
+            const SizedBox(height: AppSpacing.md),
+            _buildInfoRow(
+              theme,
+              icon: Icons.business_rounded,
+              label: 'Companies Following',
+              value: '${seeker.followedCompanies.length} companies',
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            CustomButton(
+              text: 'Logout',
+              icon: Icons.logout_rounded,
+              onPressed: () async {
+                await authProvider.logout();
+                if (!context.mounted) return;
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  (route) => false,
+                );
+              },
+              backgroundColor: theme.colorScheme.error,
+              textColor: theme.colorScheme.onError,
+            ),
+            const SizedBox(height: AppSpacing.xl),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value, ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+  Widget _buildInfoRow(ThemeData theme,
+      {required IconData icon, required String label, required String value}) {
+    return Container(
+      padding: AppSpacing.paddingLg,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: theme.colorScheme.outline, width: 1),
+      ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: theme.colorScheme.primary),
-          const SizedBox(width: AppSpacing.md),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-              Text(value, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-            ],
+          Container(
+            padding: AppSpacing.paddingSm,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 20, color: theme.colorScheme.primary),
+          ),
+          const SizedBox(width: AppSpacing.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
