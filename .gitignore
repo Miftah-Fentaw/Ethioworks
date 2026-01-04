@@ -46,7 +46,8 @@ app.*.map.json
 
 # Secrets and Local Configurations
 .firebase/
-.firebade.json
+lib/firebase_options.dart
+.firebase.json
 *.keystore
 *.jks
 *.p12
