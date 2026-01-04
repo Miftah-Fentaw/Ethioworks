@@ -4,11 +4,18 @@ import 'package:ethioworks/providers/auth_provider.dart';
 import 'package:ethioworks/providers/job_provider.dart';
 import 'package:ethioworks/providers/application_provider.dart';
 import 'package:ethioworks/screens/mobile/auth/splash.dart';
-import 'package:ethioworks/screens/web_and_desktop/auth/splash.dart' as web_splash;
-import 'package:ethioworks/utils/platform_checker.dart';
+import 'package:ethioworks/screens/web_and_desktop/auth/splash.dart'
+    as web_splash;
+import 'package:ethioworks/widgets/responsive_layout.dart';
 import 'theme.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -29,9 +36,10 @@ class MyApp extends StatelessWidget {
         theme: lightTheme,
         darkTheme: darkTheme,
         themeMode: ThemeMode.system,
-        home: PlatformChecker.detectPlatform() == AppPlatform.mobile
-            ? const SplashScreen()
-            : const web_splash.WebSplashScreen(),
+        home: const ResponsiveLayout(
+          mobile: SplashScreen(),
+          desktop: web_splash.WebSplashScreen(),
+        ),
       ),
     );
   }

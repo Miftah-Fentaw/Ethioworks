@@ -34,10 +34,10 @@ class AppSpacing {
 
 /// Border radius constants for consistent rounded corners
 class AppRadius {
-  static const double sm = 8.0;
-  static const double md = 12.0;
-  static const double lg = 16.0;
-  static const double xl = 24.0;
+  static const double sm = 12.0;
+  static const double md = 16.0;
+  static const double lg = 24.0;
+  static const double xl = 32.0;
 }
 
 // =============================================================================
@@ -84,15 +84,15 @@ class LightModeColors {
   // Primary: Black - authoritative and classic
   static const lightPrimary = Color(0xFF000000);
   static const lightOnPrimary = Color(0xFFFFFFFF);
-  static const lightPrimaryContainer = Color(0xFFE0E0E0);
+  static const lightPrimaryContainer = Color(0xFFF5F5F5);
   static const lightOnPrimaryContainer = Color(0xFF000000);
 
   // Secondary: Dark Grey
-  static const lightSecondary = Color(0xFF424242);
+  static const lightSecondary = Color(0xFF222222);
   static const lightOnSecondary = Color(0xFFFFFFFF);
 
   // Tertiary: Grey
-  static const lightTertiary = Color(0xFF757575);
+  static const lightTertiary = Color(0xFF666666);
   static const lightOnTertiary = Color(0xFFFFFFFF);
 
   // Error colors
@@ -105,11 +105,11 @@ class LightModeColors {
   static const lightSurface = Color(0xFFFFFFFF);
   static const lightOnSurface = Color(0xFF000000);
   static const lightBackground = Color(0xFFFFFFFF);
-  static const lightSurfaceVariant = Color(0xFFF5F5F5);
+  static const lightSurfaceVariant = Color(0xFFF9F9F9);
   static const lightOnSurfaceVariant = Color(0xFF000000);
 
   // Outline and shadow
-  static const lightOutline = Color(0xFF000000);
+  static const lightOutline = Color(0xFFEEEEEE);
   static const lightShadow = Color(0xFF000000);
   static const lightInversePrimary = Color(0xFFFFFFFF);
 }
@@ -120,15 +120,15 @@ class DarkModeColors {
   // Primary: White
   static const darkPrimary = Color(0xFFFFFFFF);
   static const darkOnPrimary = Color(0xFF000000);
-  static const darkPrimaryContainer = Color(0xFF333333);
+  static const darkPrimaryContainer = Color(0xFF1A1A1A);
   static const darkOnPrimaryContainer = Color(0xFFFFFFFF);
 
   // Secondary: Light Grey
-  static const darkSecondary = Color(0xFFBDBDBD);
+  static const darkSecondary = Color(0xFFE0E0E0);
   static const darkOnSecondary = Color(0xFF000000);
 
   // Tertiary: Grey
-  static const darkTertiary = Color(0xFF9E9E9E);
+  static const darkTertiary = Color(0xFF999999);
   static const darkOnTertiary = Color(0xFF000000);
 
   // Error colors
@@ -138,17 +138,19 @@ class DarkModeColors {
   static const darkOnErrorContainer = Color(0xFFFFDAD6);
 
   // Surface and background:
-  // Surface is dark grey to stand out from the pure black background
-  static const darkSurface = Color(0xFF1E1E1E);
-  static const darkOnSurface = Color(0xFFFFFFFF);
-  static const darkSurfaceVariant = Color(0xFF303030);
-  static const darkOnSurfaceVariant = Color(0xFFE0E0E0);
+  // Background is pure black for depth
   static const darkBackground = Color(0xFF000000);
+  // Surface is deep charcoal
+  static const darkSurface = Color(0xFF0F0F0F);
+  static const darkOnSurface = Color(0xFFFFFFFF);
+  // Surface variant for cards/containers
+  static const darkSurfaceVariant = Color(0xFF161616);
+  static const darkOnSurfaceVariant = Color(0xFFBDBDBD);
 
   // Outline and shadow
-  static const darkOutline = Color(0xFF757575);
+  static const darkOutline = Color(0xFF222222);
   static const darkShadow =
-      Color(0x40FFFFFF); // White shadow with low opacity for 'glow'
+      Color(0x80000000); // Stronger black shadow for depth
   static const darkInversePrimary = Color(0xFF000000);
 }
 
@@ -206,16 +208,44 @@ ThemeData get lightTheme => ThemeData(
         foregroundColor: LightModeColors.lightOnSurface,
         elevation: 0,
         scrolledUnderElevation: 0,
+        centerTitle: false,
       ),
       cardTheme: CardThemeData(
-        elevation: 4,
-        shadowColor: Colors.black.withValues(alpha: 0.1),
+        color: LightModeColors.lightSurface,
+        elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: LightModeColors.lightOutline.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          side: const BorderSide(
+            color: LightModeColors.lightOutline,
             width: 1,
+          ),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: LightModeColors.lightPrimary,
+          foregroundColor: LightModeColors.lightOnPrimary,
+          minimumSize: const Size(double.infinity, 56),
+          shape: const StadiumBorder(),
+          textStyle: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          elevation: 0,
+          foregroundColor: LightModeColors.lightPrimary,
+          side:
+              const BorderSide(color: LightModeColors.lightOutline, width: 1.5),
+          minimumSize: const Size(double.infinity, 56),
+          shape: const StadiumBorder(),
+          textStyle: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
           ),
         ),
       ),
@@ -254,17 +284,43 @@ ThemeData get darkTheme => ThemeData(
         foregroundColor: DarkModeColors.darkOnSurface,
         elevation: 0,
         scrolledUnderElevation: 0,
+        centerTitle: false,
       ),
       cardTheme: CardThemeData(
-        color: DarkModeColors.darkSurface, // Explicitly set card color
-        elevation: 8, // Higher elevation for visibility
-        shadowColor: DarkModeColors.darkShadow, // White-ish shadow
+        color: DarkModeColors.darkSurfaceVariant,
+        elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: DarkModeColors.darkOutline.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          side: const BorderSide(
+            color: DarkModeColors.darkOutline,
             width: 1,
+          ),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: DarkModeColors.darkPrimary,
+          foregroundColor: DarkModeColors.darkOnPrimary,
+          minimumSize: const Size(double.infinity, 56),
+          shape: const StadiumBorder(),
+          textStyle: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          elevation: 0,
+          foregroundColor: DarkModeColors.darkPrimary,
+          side: const BorderSide(color: DarkModeColors.darkOutline, width: 1.5),
+          minimumSize: const Size(double.infinity, 56),
+          shape: const StadiumBorder(),
+          textStyle: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
           ),
         ),
       ),
