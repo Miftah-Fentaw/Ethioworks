@@ -92,6 +92,3 @@ The web and desktop versions utilize the horizontal space to provide a comprehen
 
 ---
 
-<p align="center">
-  Built with ❤️ for the Ethiopian Tech Community
-</p>
