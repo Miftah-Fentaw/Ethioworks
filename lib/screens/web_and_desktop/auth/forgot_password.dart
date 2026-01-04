@@ -177,7 +177,7 @@ class _WebForgotPasswordScreenState extends State<WebForgotPasswordScreen> {
                     fit: StackFit.expand,
                     children: [
                       Image.network(
-                        'https://images.unsplash.com/photo-1588196746584-700c91e9dc2b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+                        'https://images.unsplash.com/photo-1633265486064-086b219458ec?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGFzc3dvcmR8ZW58MHx8MHx8fDA%3D',
                         fit: BoxFit.cover,
                       ),
                       const Center(
