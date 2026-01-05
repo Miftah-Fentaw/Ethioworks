@@ -81,19 +81,19 @@ extension TextStyleExtensions on TextStyle {
 /// Monochrome color palette for light mode
 /// Clean, minimalist, black and white design
 class LightModeColors {
-  // Primary: Black - authoritative and classic
-  static const lightPrimary = Color(0xFF000000);
+  // Primary: Dark Teal/Indigo - From Dribbble Shot Header
+  static const lightPrimary = Color(0xFF11213A);
   static const lightOnPrimary = Color(0xFFFFFFFF);
-  static const lightPrimaryContainer = Color(0xFFF5F5F5);
-  static const lightOnPrimaryContainer = Color(0xFF000000);
+  static const lightPrimaryContainer = Color(0xFFE8EAF6);
+  static const lightOnPrimaryContainer = Color(0xFF11213A);
 
-  // Secondary: Dark Grey
-  static const lightSecondary = Color(0xFF222222);
-  static const lightOnSecondary = Color(0xFFFFFFFF);
+  // Secondary: Mint Green - From Dribbble Shot Accent
+  static const lightSecondary = Color(0xFF40E0D0);
+  static const lightOnSecondary = Color(0xFF11213A);
 
-  // Tertiary: Grey
-  static const lightTertiary = Color(0xFF666666);
-  static const lightOnTertiary = Color(0xFFFFFFFF);
+  // Tertiary: Soft Green - For Badges (New, Urgent)
+  static const lightTertiary = Color(0xFFE0F2F1);
+  static const lightOnTertiary = Color(0xFF00695C);
 
   // Error colors
   static const lightError = Color(0xFFBA1A1A);
@@ -101,35 +101,34 @@ class LightModeColors {
   static const lightErrorContainer = Color(0xFFFFDAD6);
   static const lightOnErrorContainer = Color(0xFF410002);
 
-  // Surface and background: Pure White
+  // Surface and background: Light Blue/Gray Surface
   static const lightSurface = Color(0xFFFFFFFF);
-  static const lightOnSurface = Color(0xFF000000);
-  static const lightBackground = Color(0xFFFFFFFF);
-  static const lightSurfaceVariant = Color(0xFFF9F9F9);
-  static const lightOnSurfaceVariant = Color(0xFF000000);
+  static const lightOnSurface = Color(0xFF1A1C1E);
+  static const lightBackground = Color(0xFFF5F6F8);
+  static const lightSurfaceVariant = Color(0xFFF9FAFB);
+  static const lightOnSurfaceVariant = Color(0xFF44474E);
 
   // Outline and shadow
-  static const lightOutline = Color(0xFFEEEEEE);
-  static const lightShadow = Color(0xFF000000);
+  static const lightOutline = Color(0xFFE0E0E0);
+  static const lightShadow = Color(0xFF11213A);
   static const lightInversePrimary = Color(0xFFFFFFFF);
 }
 
-/// Monochrome color palette for dark mode
-/// High contrast, black and white design
+/// Dark mode colors (Keeping it elegant)
 class DarkModeColors {
-  // Primary: White
+  // Primary: White/Light Gray
   static const darkPrimary = Color(0xFFFFFFFF);
-  static const darkOnPrimary = Color(0xFF000000);
-  static const darkPrimaryContainer = Color(0xFF1A1A1A);
+  static const darkOnPrimary = Color(0xFF11213A);
+  static const darkPrimaryContainer = Color(0xFF1A2A4A);
   static const darkOnPrimaryContainer = Color(0xFFFFFFFF);
 
-  // Secondary: Light Grey
-  static const darkSecondary = Color(0xFFE0E0E0);
-  static const darkOnSecondary = Color(0xFF000000);
+  // Secondary: Mint Green
+  static const darkSecondary = Color(0xFF40E0D0);
+  static const darkOnSecondary = Color(0xFF11213A);
 
-  // Tertiary: Grey
-  static const darkTertiary = Color(0xFF999999);
-  static const darkOnTertiary = Color(0xFF000000);
+  // Tertiary: Light Charcoal
+  static const darkTertiary = Color(0xFF2C3E50);
+  static const darkOnTertiary = Color(0xFFFFFFFF);
 
   // Error colors
   static const darkError = Color(0xFFFFB4AB);
@@ -138,20 +137,16 @@ class DarkModeColors {
   static const darkOnErrorContainer = Color(0xFFFFDAD6);
 
   // Surface and background:
-  // Background is pure black for depth
-  static const darkBackground = Color(0xFF000000);
-  // Surface is deep charcoal
-  static const darkSurface = Color(0xFF0F0F0F);
+  static const darkBackground = Color(0xFF0A121E);
+  static const darkSurface = Color(0xFF11213A);
   static const darkOnSurface = Color(0xFFFFFFFF);
-  // Surface variant for cards/containers
-  static const darkSurfaceVariant = Color(0xFF161616);
+  static const darkSurfaceVariant = Color(0xFF1A2A4A);
   static const darkOnSurfaceVariant = Color(0xFFBDBDBD);
 
   // Outline and shadow
-  static const darkOutline = Color(0xFF222222);
-  static const darkShadow =
-      Color(0x80000000); // Stronger black shadow for depth
-  static const darkInversePrimary = Color(0xFF000000);
+  static const darkOutline = Color(0xFF2C3E50);
+  static const darkShadow = Color(0x80000000);
+  static const darkInversePrimary = Color(0xFF11213A);
 }
 
 /// Font size constants
@@ -227,7 +222,7 @@ ThemeData get lightTheme => ThemeData(
           elevation: 0,
           backgroundColor: LightModeColors.lightPrimary,
           foregroundColor: LightModeColors.lightOnPrimary,
-          minimumSize: const Size(double.infinity, 56),
+          minimumSize: const Size(64, 56),
           shape: const StadiumBorder(),
           textStyle: GoogleFonts.inter(
             fontWeight: FontWeight.w600,
@@ -241,7 +236,7 @@ ThemeData get lightTheme => ThemeData(
           foregroundColor: LightModeColors.lightPrimary,
           side:
               const BorderSide(color: LightModeColors.lightOutline, width: 1.5),
-          minimumSize: const Size(double.infinity, 56),
+          minimumSize: const Size(64, 56),
           shape: const StadiumBorder(),
           textStyle: GoogleFonts.inter(
             fontWeight: FontWeight.w600,
@@ -268,14 +263,14 @@ ThemeData get darkTheme => ThemeData(
         onError: DarkModeColors.darkOnError,
         errorContainer: DarkModeColors.darkErrorContainer,
         onErrorContainer: DarkModeColors.darkOnErrorContainer,
-        surface: DarkModeColors.darkSurface,
+        surface: DarkModeColors
+            .darkBackground, // Use background for surface to match scaffold
         onSurface: DarkModeColors.darkOnSurface,
         surfaceContainerHighest: DarkModeColors.darkSurfaceVariant,
         onSurfaceVariant: DarkModeColors.darkOnSurfaceVariant,
         outline: DarkModeColors.darkOutline,
         shadow: DarkModeColors.darkShadow,
         inversePrimary: DarkModeColors.darkInversePrimary,
-        background: DarkModeColors.darkBackground,
       ),
       brightness: Brightness.dark,
       scaffoldBackgroundColor: DarkModeColors.darkBackground,
@@ -303,7 +298,7 @@ ThemeData get darkTheme => ThemeData(
           elevation: 0,
           backgroundColor: DarkModeColors.darkPrimary,
           foregroundColor: DarkModeColors.darkOnPrimary,
-          minimumSize: const Size(double.infinity, 56),
+          minimumSize: const Size(64, 56),
           shape: const StadiumBorder(),
           textStyle: GoogleFonts.inter(
             fontWeight: FontWeight.w600,
@@ -316,7 +311,7 @@ ThemeData get darkTheme => ThemeData(
           elevation: 0,
           foregroundColor: DarkModeColors.darkPrimary,
           side: const BorderSide(color: DarkModeColors.darkOutline, width: 1.5),
-          minimumSize: const Size(double.infinity, 56),
+          minimumSize: const Size(64, 56),
           shape: const StadiumBorder(),
           textStyle: GoogleFonts.inter(
             fontWeight: FontWeight.w600,
