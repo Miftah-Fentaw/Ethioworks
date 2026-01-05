@@ -34,10 +34,22 @@ EthioWorks is a state-of-the-art job portal designed to bridge the gap between t
 The mobile application is optimized for on-the-go browsing, featuring a sleek bottom navigation bar and intuitive gestures.
 
 <p align="center">
-  <img src="assets/screenshots/mobile1.png" width="20%" />
-  <img src="assets/screenshots/mobile2.png" width="20%" />
-  <img src="assets/screenshots/mobile3.png" width="20%" />
-  <img src="assets/screenshots/mobile4.png" width="20%" />
+  <img src="assets/screenshots/mobile1.png" width="22%" />
+  <img src="assets/screenshots/mobile2.png" width="22%" />
+  <img src="assets/screenshots/mobile3.png" width="22%" />
+  <img src="assets/screenshots/mobile4.png" width="22%" />
+</p>
+<p align="center">
+  <img src="assets/screenshots/mobile5.png" width="22%" />
+  <img src="assets/screenshots/mobile6.png" width="22%" />
+  <img src="assets/screenshots/mobile7.png" width="22%" />
+  <img src="assets/screenshots/mobile8.png" width="22%" />
+</p>
+<p align="center">
+  <img src="assets/screenshots/mobile9.png" width="22%" />
+  <img src="assets/screenshots/mobile10.png" width="22%" />
+  <img src="assets/screenshots/mobile11.png" width="22%" />
+  <img src="assets/screenshots/mobile12.png" width="22%" />
 </p>
 
 ## 💻 Web & Desktop Experience
@@ -45,12 +57,22 @@ The mobile application is optimized for on-the-go browsing, featuring a sleek bo
 The web and desktop versions utilize the horizontal space to provide a comprehensive management interface for employers and an expansive browsing experience for seekers.
 
 <p align="center">
-  <img src="assets/screenshots/wd1.png" width="45%" />
-  <img src="assets/screenshots/wd2.png" width="45%" />
+  <img src="assets/screenshots/wd1.png" width="22%" />
+  <img src="assets/screenshots/wd2.png" width="22%" />
+  <img src="assets/screenshots/wd3.png" width="22%" />
+  <img src="assets/screenshots/wd4.png" width="22%" />
 </p>
 <p align="center">
-  <img src="assets/screenshots/wd3.png" width="45%" />
-  <img src="assets/screenshots/wd4.png" width="45%" />
+  <img src="assets/screenshots/wd5.png" width="22%" />
+  <img src="assets/screenshots/wd6.png" width="22%" />
+  <img src="assets/screenshots/wd7.png" width="22%" />
+  <img src="assets/screenshots/wd10.png" width="22%" />
+</p>
+<p align="center">
+  <img src="assets/screenshots/wd8.png" width="22%" />
+  <img src="assets/screenshots/wd9.png" width="22%" />
+  <img src="assets/screenshots/wd11.png" width="22%" />
+  <img src="assets/screenshots/wd13.png" width="22%" />
 </p>
 
 ## 🔌 Tech Stack
