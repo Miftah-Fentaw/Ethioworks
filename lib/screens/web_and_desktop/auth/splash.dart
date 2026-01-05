@@ -2,10 +2,9 @@ import 'package:ethioworks/screens/mobile/job_seeker/job_seeker_root.dart'
     as mobile_seeker;
 import 'package:ethioworks/screens/mobile/employer/employer_root.dart'
     as mobile_employer;
-import 'package:ethioworks/screens/mobile/auth/signin.dart' as mobile_signin;
 import 'package:ethioworks/screens/web_and_desktop/employer/employer_root.dart';
 import 'package:ethioworks/screens/web_and_desktop/job_seeker/job_seeker_root.dart';
-import 'package:ethioworks/screens/web_and_desktop/auth/signin.dart';
+import 'package:ethioworks/screens/landing_page.dart';
 import 'package:ethioworks/widgets/responsive_layout.dart';
 import 'package:ethioworks/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
@@ -70,10 +69,7 @@ class _WebSplashScreenState extends State<WebSplashScreen>
     } else {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => const ResponsiveLayout(
-            mobile: mobile_signin.LoginScreen(),
-            desktop: WebLoginScreen(),
-          ),
+          builder: (_) => const LandingPage(),
         ),
       );
     }

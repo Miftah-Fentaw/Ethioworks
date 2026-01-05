@@ -204,14 +204,6 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                         ),
                       );
                     }
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(authProvider.errorMessage ??
-                            'Google Sign-In failed'),
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                      ),
-                    );
                   }
                 },
           icon: Image.asset(
@@ -277,7 +269,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                 // Form Section with Modern Card Design
                 Expanded(
                   child: Container(
-                    color: theme.colorScheme.background,
+      color: theme.colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 48, vertical: 40),
                     child: Center(

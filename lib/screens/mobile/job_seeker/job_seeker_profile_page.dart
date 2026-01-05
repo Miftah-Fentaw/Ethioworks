@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ethioworks/providers/auth_provider.dart';
+import 'package:ethioworks/providers/theme_provider.dart';
 import 'package:ethioworks/screens/mobile/auth/signin.dart';
 import 'package:ethioworks/widgets/profile_avatar.dart';
 import 'package:ethioworks/widgets/custom_button.dart';
@@ -108,6 +109,7 @@ class SeekerProfileScreen extends StatelessWidget {
               ),
             ],
             const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.md),
             _buildInfoRow(
               theme,
               icon: Icons.business_rounded,
@@ -115,6 +117,29 @@ class SeekerProfileScreen extends StatelessWidget {
               value: '${seeker.followedCompanies.length} companies',
             ),
             const SizedBox(height: AppSpacing.xxl),
+            Container(
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(color: theme.colorScheme.outline, width: 1),
+              ),
+              child: SwitchListTile(
+                value: context.watch<ThemeProvider>().isDarkMode,
+                onChanged: (_) => context.read<ThemeProvider>().toggleTheme(),
+                title: Text(
+                  'Dark Mode',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                secondary: Icon(
+                  Icons.dark_mode_rounded,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
             CustomButton(
               text: 'Logout',
               icon: Icons.logout_rounded,

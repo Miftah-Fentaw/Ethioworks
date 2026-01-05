@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:ethioworks/providers/auth_provider.dart';
+import 'package:ethioworks/providers/theme_provider.dart';
+import 'package:ethioworks/widgets/profile_avatar.dart';
 import 'package:ethioworks/screens/web_and_desktop/employer/employer_home_page.dart';
 import 'package:ethioworks/screens/web_and_desktop/employer/post_job_page.dart';
 import 'package:ethioworks/screens/web_and_desktop/employer/all_applicants_screen.dart';
@@ -21,142 +25,195 @@ class _EmployerRootState extends State<EmployerRoot> {
     EmployerProfileScreen(),
   ];
 
-  final List<_NavItem> _navItems = const [
-    _NavItem(icon: Icons.home, label: 'Home'),
-    _NavItem(icon: Icons.post_add, label: 'Post Job'),
-    _NavItem(icon: Icons.people, label: 'Applicants'),
-    _NavItem(icon: Icons.person, label: 'Profile'),
+  final List<String> _navLabels = [
+    'My Jobs',
+    'Post Job',
+    'Applicants',
+    'Profile',
   ];
-
-  void _onTap(int idx) => setState(() => _selectedIndex = idx);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final authProvider = context.watch<AuthProvider>();
+    final themeProvider = context.watch<ThemeProvider>();
+    final employer = authProvider.currentEmployer;
 
     return Scaffold(
-      body: Row(
+      backgroundColor: theme.colorScheme.surface,
+      body: Column(
         children: [
-          // Modern Sidebar Navigation
+          // Top Navigation Bar (matching job seeker style)
           Container(
-            width: 260,
+            height: 80,
+            padding: const EdgeInsets.symmetric(horizontal: 48),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
+              color: const Color(0xFF11213A),
               boxShadow: [
                 BoxShadow(
-                  color: theme.colorScheme.shadow.withValues(alpha: 0.05),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
-                  offset: const Offset(2, 0),
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // App Logo/Title
-                  Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Row(
+            child: Row(
+              children: [
+                // Logo
+                Row(
+                  children: [
+                    Icon(
+                      Icons.business_rounded,
+                      color: const Color(0xFF40E0D0),
+                      size: 32,
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'EthioWorks',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 64),
+                // Nav Links
+                Row(
+                  children: List.generate(_navLabels.length, (index) {
+                    return _topNavLink(
+                        _navLabels[index], _selectedIndex == index, index);
+                  }),
+                ),
+                const Spacer(),
+                // Right side actions
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        themeProvider.isDarkMode
+                            ? Icons.light_mode_rounded
+                            : Icons.dark_mode_rounded,
+                        color: Colors.white70,
+                      ),
+                      onPressed: () => themeProvider.toggleTheme(),
+                      tooltip: 'Toggle Theme',
+                    ),
+                    const SizedBox(width: 16),
+                    ProfileAvatar(
+                      imageUrl: employer?.profilePic,
+                      name: employer?.companyOrPersonalName ?? 'Company',
+                      size: 40,
+                      avatarType: AvatarType.company,
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.business_rounded,
-                          color: theme.colorScheme.primary,
-                          size: 32,
+                        Text(
+                          employer?.companyOrPersonalName ?? 'Company',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
                         ),
-                        const SizedBox(width: 12),
                         Text(
                           'Employer',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: 12,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  Divider(
-                      height: 1,
-                      color: theme.colorScheme.outline.withValues(alpha: 0.2)),
-                  const SizedBox(height: 16),
-                  // Navigation Items
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: _navItems.length,
-                      itemBuilder: (context, i) {
-                        final item = _navItems[i];
-                        final selected = i == _selectedIndex;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () => _onTap(i),
-                              borderRadius: BorderRadius.circular(12),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: selected
-                                      ? theme.colorScheme.primary
-                                          .withValues(alpha: 0.12)
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: selected
-                                      ? Border.all(
-                                          color: theme.colorScheme.primary
-                                              .withValues(alpha: 0.3),
-                                          width: 1,
-                                        )
-                                      : null,
-                                ),
-                                child: ListTile(
-                                  leading: Icon(
-                                    item.icon,
-                                    color: selected
-                                        ? theme.colorScheme.primary
-                                        : theme.colorScheme.onSurfaceVariant,
-                                    size: 24,
-                                  ),
-                                  title: Text(
-                                    item.label,
-                                    style: theme.textTheme.bodyLarge?.copyWith(
-                                      color: selected
-                                          ? theme.colorScheme.primary
-                                          : theme.colorScheme.onSurface,
-                                      fontWeight: selected
-                                          ? FontWeight.w600
-                                          : FontWeight.w500,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 4),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
+                    const SizedBox(width: 8),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                          color: Colors.white70, size: 20),
+                      offset: const Offset(0, 40),
+                      onSelected: (value) async {
+                        if (value == 'logout') {
+                          await authProvider.logout();
+                        } else if (value == 'profile') {
+                          setState(() => _selectedIndex = 3);
+                        }
                       },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'profile',
+                          child: Row(
+                            children: [
+                              Icon(Icons.person_outline),
+                              SizedBox(width: 12),
+                              Text('Profile'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'logout',
+                          child: Row(
+                            children: [
+                              Icon(Icons.logout, color: Colors.red),
+                              SizedBox(width: 12),
+                              Text('Logout',
+                                  style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
           ),
           // Main Content Area
           Expanded(
-            child: Container(
-              color: theme.colorScheme.background,
-              child: _pages[_selectedIndex],
-            ),
+            child: _pages[_selectedIndex],
           ),
         ],
       ),
     );
   }
-}
 
-class _NavItem {
-  final IconData icon;
-  final String label;
-  const _NavItem({required this.icon, required this.label});
+  Widget _topNavLink(String label, bool isActive, int index) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: InkWell(
+        onTap: () => setState(() => _selectedIndex = index),
+        borderRadius: BorderRadius.circular(8),
+        hoverColor: Colors.white.withValues(alpha: 0.05),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: isActive
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: 0.7),
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                fontSize: 15,
+                letterSpacing: 0.2,
+              ),
+            ),
+            const SizedBox(height: 6),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: isActive ? 6 : 0,
+              height: 6,
+              decoration: const BoxDecoration(
+                color: Color(0xFF40E0D0),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

@@ -2,15 +2,13 @@ import 'package:ethioworks/screens/mobile/employer/employer_root.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ethioworks/providers/auth_provider.dart';
-import 'package:ethioworks/screens/mobile/auth/signin.dart';
 import 'package:ethioworks/screens/mobile/job_seeker/job_seeker_root.dart';
 import 'package:ethioworks/screens/web_and_desktop/job_seeker/job_seeker_root.dart'
     as web_seeker;
 import 'package:ethioworks/screens/web_and_desktop/employer/employer_root.dart'
     as web_employer;
-import 'package:ethioworks/screens/web_and_desktop/auth/signin.dart'
-    as web_signin;
 import 'package:ethioworks/widgets/responsive_layout.dart';
+import 'package:ethioworks/screens/landing_page.dart';
 import 'package:ethioworks/theme.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -74,10 +72,7 @@ class _SplashScreenState extends State<SplashScreen>
     } else {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => const ResponsiveLayout(
-            mobile: LoginScreen(),
-            desktop: web_signin.WebLoginScreen(),
-          ),
+          builder: (_) => const LandingPage(),
         ),
       );
     }

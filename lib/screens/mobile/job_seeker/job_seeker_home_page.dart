@@ -17,7 +17,6 @@ class SeekerHomeScreen extends StatefulWidget {
 }
 
 class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
-  LocationType? _selectedLocationType;
   final Map<String, String?> _userReactions = {};
 
   @override
@@ -29,6 +28,7 @@ class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
   }
 
   void _showFilterDialog() {
+    final jobProvider = context.read<JobProvider>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -36,14 +36,17 @@ class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),
       builder: (context) => FilterBottomSheet(
-        selectedLocationType: _selectedLocationType,
-        onApplyFilters: (locationType) {
-          setState(() => _selectedLocationType = locationType);
+        initialTitle: jobProvider.searchTitle,
+        initialLocation: jobProvider.searchLocation,
+        selectedLocationType: jobProvider.selectedLocationType,
+        onApplyFilters: (title, location, locationType) {
           context.read<JobProvider>().filterJobs(locationType: locationType);
+          context
+              .read<JobProvider>()
+              .searchJobs(title: title, location: location);
           Navigator.pop(context);
         },
         onClearFilters: () {
-          setState(() => _selectedLocationType = null);
           context.read<JobProvider>().clearFilters();
           Navigator.pop(context);
         },
@@ -75,16 +78,18 @@ class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
     _loadUserReactions(jobs);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'EthioWorks',
               style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary, // Primary color for logo text
                 letterSpacing: -1,
               ),
             ),
@@ -121,48 +126,102 @@ class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
           const SizedBox(width: AppSpacing.md),
         ],
       ),
-      body: RefreshIndicator(
-        color: theme.colorScheme.primary,
-        backgroundColor: theme.colorScheme.surface,
-        onRefresh: () => context.read<JobProvider>().loadJobs(),
-        child: jobProvider.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : jobs.isEmpty
-                ? _buildEmptyState(theme)
-                : ListView.builder(
-                    padding: AppSpacing.paddingMd,
-                    itemCount: jobs.length,
-                    itemBuilder: (context, index) {
-                      final job = jobs[index];
-
-                      return JobCard(
-                        job: job,
-                        userReaction: _userReactions[job.id],
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => JobDetailScreen(jobId: job.id),
+      body: Column(
+        children: [
+          // Search Bar below Header (Web style but for mobile)
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: theme.colorScheme.surface,
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: _showFilterDialog,
+                    child: Container(
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.search,
+                              color: theme.colorScheme.onSurfaceVariant),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              jobProvider.searchTitle.isNotEmpty
+                                  ? jobProvider.searchTitle
+                                  : 'Search jobs...',
+                              style: TextStyle(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontWeight: jobProvider.searchTitle.isNotEmpty
+                                      ? FontWeight.bold
+                                      : FontWeight.normal),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          );
-                        },
-                        onLike: () async {
-                          final userId = authProvider.currentUser?.id ?? '';
-                          await jobProvider.likeJob(job.id, userId);
-                          final reaction =
-                              await jobProvider.getUserReaction(job.id, userId);
-                          setState(() => _userReactions[job.id] = reaction);
-                        },
-                        onDislike: () async {
-                          final userId = authProvider.currentUser?.id ?? '';
-                          await jobProvider.dislikeJob(job.id, userId);
-                          final reaction =
-                              await jobProvider.getUserReaction(job.id, userId);
-                          setState(() => _userReactions[job.id] = reaction);
-                        },
-                      );
-                    },
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              color: theme.colorScheme.primary,
+              backgroundColor: theme.colorScheme.surface,
+              onRefresh: () => context.read<JobProvider>().loadJobs(),
+              child: jobProvider.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : jobs.isEmpty
+                      ? _buildEmptyState(theme)
+                      : ListView.builder(
+                          padding: AppSpacing.paddingMd,
+                          itemCount: jobs.length,
+                          itemBuilder: (context, index) {
+                            final job = jobs[index];
+
+                            return JobCard(
+                              job: job,
+                              userReaction: _userReactions[job.id],
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        JobDetailScreen(jobId: job.id),
+                                  ),
+                                );
+                              },
+                              onLike: () async {
+                                final userId =
+                                    authProvider.currentUser?.id ?? '';
+                                await jobProvider.likeJob(job.id, userId);
+                                final reaction = await jobProvider
+                                    .getUserReaction(job.id, userId);
+                                setState(
+                                    () => _userReactions[job.id] = reaction);
+                              },
+                              onDislike: () async {
+                                final userId =
+                                    authProvider.currentUser?.id ?? '';
+                                await jobProvider.dislikeJob(job.id, userId);
+                                final reaction = await jobProvider
+                                    .getUserReaction(job.id, userId);
+                                setState(
+                                    () => _userReactions[job.id] = reaction);
+                              },
+                            );
+                          },
+                        ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -171,9 +230,8 @@ class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
       {required IconData icon, required VoidCallback onTap}) {
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         shape: BoxShape.circle,
-        border: Border.all(color: theme.colorScheme.outline, width: 1),
       ),
       child: IconButton(
         icon: Icon(icon, color: theme.colorScheme.onSurface, size: 20),
@@ -225,12 +283,16 @@ class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
 }
 
 class FilterBottomSheet extends StatefulWidget {
+  final String? initialTitle;
+  final String? initialLocation;
   final LocationType? selectedLocationType;
-  final Function(LocationType?) onApplyFilters;
+  final Function(String, String, LocationType?) onApplyFilters;
   final VoidCallback onClearFilters;
 
   const FilterBottomSheet({
     super.key,
+    this.initialTitle,
+    this.initialLocation,
     required this.selectedLocationType,
     required this.onApplyFilters,
     required this.onClearFilters,
@@ -241,12 +303,23 @@ class FilterBottomSheet extends StatefulWidget {
 }
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
+  late TextEditingController _titleController;
+  late TextEditingController _locationController;
   LocationType? _tempLocationType;
 
   @override
   void initState() {
     super.initState();
+    _titleController = TextEditingController(text: widget.initialTitle);
+    _locationController = TextEditingController(text: widget.initialLocation);
     _tempLocationType = widget.selectedLocationType;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _locationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -284,7 +357,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Filters',
+                'Search & Filter',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.5,
@@ -303,6 +376,20 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
+          _buildTextField(
+            theme,
+            controller: _titleController,
+            label: 'Job Title or Keywords',
+            icon: Icons.work_outline_rounded,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          _buildTextField(
+            theme,
+            controller: _locationController,
+            label: 'Location',
+            icon: Icons.location_on_outlined,
+          ),
+          const SizedBox(height: AppSpacing.xl),
           _buildFilterSection(
             theme,
             title: 'Location Type',
@@ -318,10 +405,38 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           ),
           const SizedBox(height: AppSpacing.xxl),
           ElevatedButton(
-            onPressed: () => widget.onApplyFilters(_tempLocationType),
-            child: const Text('Apply Filters'),
+            onPressed: () => widget.onApplyFilters(
+              _titleController.text,
+              _locationController.text,
+              _tempLocationType,
+            ),
+            child: const Text('Show Results'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(ThemeData theme,
+      {required TextEditingController controller,
+      required String label,
+      required IconData icon}) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
+        filled: true,
+        fillColor:
+            theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
       ),
     );
   }

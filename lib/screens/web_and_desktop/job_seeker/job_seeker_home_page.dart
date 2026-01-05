@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ethioworks/models/job_post_model.dart';
-import 'package:ethioworks/providers/auth_provider.dart';
 import 'package:ethioworks/providers/job_provider.dart';
-import 'package:ethioworks/screens/web_and_desktop/job_seeker/job_detail_page.dart';
-import 'package:ethioworks/screens/web_and_desktop/job_seeker/job_seeker_profile_page.dart';
+import 'package:ethioworks/screens/web_and_desktop/job_seeker/job_detail_panel.dart';
+import 'package:ethioworks/screens/web_and_desktop/job_seeker/apply_job_page.dart';
 import 'package:ethioworks/widgets/job_card.dart';
-import 'package:ethioworks/widgets/profile_avatar.dart';
 import 'package:ethioworks/theme.dart';
 
 class SeekerHomeScreen extends StatefulWidget {
@@ -17,8 +15,16 @@ class SeekerHomeScreen extends StatefulWidget {
 }
 
 class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
-  LocationType? _selectedLocationType;
   final Map<String, String?> _userReactions = {};
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _locationController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -28,160 +34,213 @@ class _SeekerHomeScreenState extends State<SeekerHomeScreen> {
     });
   }
 
-  void _showFilterDialog() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
-      ),
-      builder: (context) => FilterBottomSheet(
-        selectedLocationType: _selectedLocationType,
-        onApplyFilters: (locationType) {
-          setState(() => _selectedLocationType = locationType);
-          context.read<JobProvider>().filterJobs(locationType: locationType);
-          Navigator.pop(context);
-        },
-        onClearFilters: () {
-          setState(() => _selectedLocationType = null);
-          context.read<JobProvider>().clearFilters();
-          Navigator.pop(context);
-        },
-      ),
-    );
-  }
-
-  Future<void> _loadUserReactions(List<JobPost> jobs) async {
-    final authProvider = context.read<AuthProvider>();
-    final jobProvider = context.read<JobProvider>();
-    final userId = authProvider.currentUser?.id ?? '';
-
-    for (final job in jobs) {
-      if (!_userReactions.containsKey(job.id)) {
-        final reaction = await jobProvider.getUserReaction(job.id, userId);
-        _userReactions[job.id] = reaction;
-      }
-    }
-  }
+  JobPost? _selectedJob;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authProvider = context.watch<AuthProvider>();
     final jobProvider = context.watch<JobProvider>();
-    final seeker = authProvider.currentJobSeeker;
 
     final jobs = jobProvider.jobs;
-    _loadUserReactions(jobs);
+
+    // Stable selection logic - only set if currently null and we have jobs
+    if (_selectedJob == null && jobs.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _selectedJob == null) {
+          setState(() => _selectedJob = jobs.first);
+        }
+      });
+    }
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
-      appBar: AppBar(
-        titleSpacing: AppSpacing.lg,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-              child: Icon(Icons.work_rounded,
-                  color: theme.colorScheme.primary, size: 24),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Column(
+        children: [
+          // Header / Search Bar area
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
+            color: const Color(0xFF11213A),
+            child: Column(
+              children: [
+                // Top Search Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 8,
+                      child: _searchField('Software Engineer, Marketer...',
+                          Icons.work_outline, _titleController),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          jobProvider.searchJobs(
+                            title: _titleController.text,
+                            location: _locationController.text,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF40E0D0),
+                        foregroundColor: const Color(0xFF11213A),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 24),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Search',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    ),
+                    Spacer()
+                   
+            
+                  ],
+                ),
+                const SizedBox(height: 24),
+                // Stats/Count
+                Text(
+                  '${jobs.length} Jobs found for "${_titleController.text.isEmpty ? 'All Positions' : _titleController.text}" in "${_locationController.text.isEmpty ? 'All Locations' : _locationController.text}."',
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                const SizedBox(height: 32),
+                // Note: Filters removed as they don't match current data structure
+              ],
             ),
-            const SizedBox(width: AppSpacing.md),
-            Text(
-              'EthioWorks',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.filter_list_rounded,
-                color: theme.colorScheme.onSurface),
-            onPressed: _showFilterDialog,
-            tooltip: 'Filter Jobs',
           ),
-          const SizedBox(width: AppSpacing.sm),
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SeekerProfileScreen()),
-              );
-            },
-            borderRadius: BorderRadius.circular(AppRadius.xl),
+          Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: ProfileAvatar(
-                imageUrl: seeker?.profilePic,
-                name: seeker?.name ?? 'User',
-                size: 36,
-                avatarType: AvatarType.jobSeeker,
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.lg),
-        ],
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1000),
-          child: RefreshIndicator(
-            onRefresh: () => context.read<JobProvider>().loadJobs(),
-            child: jobProvider.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : jobs.isEmpty
-                    ? _buildEmptyState(theme)
-                    : ListView.builder(
-                        padding: AppSpacing.paddingLg,
-                        itemCount: jobs.length,
-                        itemBuilder: (context, index) {
-                          final job = jobs[index];
-                          final userId = authProvider.currentUser?.id ?? '';
-
-                          return Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: AppSpacing.md),
-                            child: JobCard(
-                              job: job,
-                              userReaction: _userReactions[job.id],
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        JobDetailScreen(jobId: job.id),
-                                  ),
-                                );
-                              },
-                              onLike: () async {
-                                await jobProvider.likeJob(job.id, userId);
-                                final reaction = await jobProvider
-                                    .getUserReaction(job.id, userId);
-                                setState(
-                                    () => _userReactions[job.id] = reaction);
-                              },
-                              onDislike: () async {
-                                await jobProvider.dislikeJob(job.id, userId);
-                                final reaction = await jobProvider
-                                    .getUserReaction(job.id, userId);
-                                setState(
-                                    () => _userReactions[job.id] = reaction);
-                              },
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
+              child: Row(
+                children: [
+                  // Column 1: Job List
+                  Container(
+                    width: 750,
+                    margin: const EdgeInsets.only(right: 24),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: jobProvider.isLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : jobs.isEmpty
+                                  ? _buildEmptyState(theme)
+                                  : ListView.builder(
+                                      physics: const BouncingScrollPhysics(),
+                                      itemCount: jobs.length,
+                                      itemBuilder: (context, index) {
+                                        final job = jobs[index];
+                                        return TweenAnimationBuilder<double>(
+                                          tween: Tween(begin: 0.0, end: 1.0),
+                                          duration: Duration(
+                                              milliseconds: 300 + (index * 50)),
+                                          curve: Curves.easeOut,
+                                          builder: (context, value, child) {
+                                            return Transform.translate(
+                                              offset:
+                                                  Offset(0, 20 * (1 - value)),
+                                              child: Opacity(
+                                                opacity: value,
+                                                child: child,
+                                              ),
+                                            );
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 16),
+                                            child: JobCard(
+                                              job: job,
+                                              userReaction:
+                                                  _userReactions[job.id],
+                                              onTap: () => setState(
+                                                  () => _selectedJob = job),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Column 2: Detail View
+                  Expanded(
+                    flex: 4,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: theme.colorScheme.outline
+                                .withValues(alpha: 0.1)),
+                      ),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        switchInCurve: Curves.easeInOut,
+                        switchOutCurve: Curves.easeInOut,
+                        transitionBuilder: (child, animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0.05, 0),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
                             ),
                           );
                         },
+                        child: JobDetailPanel(
+                          key: ValueKey(_selectedJob?.id),
+                          job: _selectedJob,
+                          onApply: () {
+                            if (_selectedJob != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      ApplyJobScreen(job: _selectedJob!),
+                                ),
+                              );
+                            }
+                          },
+                        ),
                       ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _searchField(
+      String hint, IconData icon, TextEditingController controller) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TextField(
+        controller: controller,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          icon: Icon(icon, color: Colors.white70, size: 20),
+          hintText: hint,
+          hintStyle: const TextStyle(color: Colors.white70),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
         ),
       ),
     );
   }
+
 
   Widget _buildEmptyState(ThemeData theme) {
     return Center(

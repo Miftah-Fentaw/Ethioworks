@@ -38,16 +38,18 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
     final jobs = jobProvider.jobs;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'EthioWorks',
               style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary,
                 letterSpacing: -1,
               ),
             ),
@@ -122,9 +124,11 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
           }
         },
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Post Job'),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.lg)),
+        label: const Text('Post Job',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: theme.colorScheme.secondary,
+        foregroundColor: theme.colorScheme.onSecondary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
