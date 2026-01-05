@@ -19,6 +19,9 @@ class JobPostService {
     }
   }
 
+
+
+
   Future<JobPost?> getJobById(String id) async {
     try {
       final doc = await _firestore.collection('jobs').doc(id).get();
@@ -29,6 +32,9 @@ class JobPostService {
       return null;
     }
   }
+
+
+
 
   Future<List<JobPost>> getJobsByEmployer(String employerId) async {
     try {
@@ -45,6 +51,10 @@ class JobPostService {
       return [];
     }
   }
+
+
+
+
 
   Future<JobPost?> createJob(JobPost job) async {
     try {
@@ -65,6 +75,10 @@ class JobPostService {
     }
   }
 
+
+
+
+
   Future<JobPost?> updateJob(JobPost job) async {
     try {
       final updatedJob = job.copyWith(updatedAt: DateTime.now());
@@ -81,6 +95,13 @@ class JobPostService {
     }
   }
 
+
+
+
+
+
+
+
   Future<bool> deleteJob(String id) async {
     try {
       await _firestore.collection('jobs').doc(id).delete();
@@ -91,6 +112,11 @@ class JobPostService {
       return false;
     }
   }
+
+
+
+
+
 
   Future<void> likeJob(String jobId, String userId) async {
     try {
@@ -128,6 +154,11 @@ class JobPostService {
     }
   }
 
+
+
+
+
+
   Future<void> dislikeJob(String jobId, String userId) async {
     try {
       final reactionId = '${userId}_$jobId';
@@ -164,6 +195,10 @@ class JobPostService {
     }
   }
 
+
+
+
+
   Future<String?> getUserReaction(String jobId, String userId) async {
     try {
       final reactionId = '${userId}_$jobId';
@@ -176,6 +211,9 @@ class JobPostService {
       return null;
     }
   }
+
+
+
 
   Future<List<JobPost>> filterJobs({
     LocationType? locationType,
@@ -207,4 +245,40 @@ class JobPostService {
       return [];
     }
   }
+
+
+
+
+
+  Future<List<JobPost>> searchJobs({String? title, String? location}) async {
+    try {
+      final snapshot = await _firestore.collection('jobs').get();
+      var jobs =
+          snapshot.docs.map((doc) => JobPost.fromJson(doc.data())).toList();
+
+      if (title != null && title.isNotEmpty) {
+        jobs = jobs
+            .where((j) => j.title.toLowerCase().contains(title.toLowerCase()))
+            .toList();
+      }
+      if (location != null && location.isNotEmpty) {
+        jobs = jobs
+            .where((j) => (j.location ?? '')
+                .toLowerCase()
+                .contains(location.toLowerCase()))
+            .toList();
+      }
+
+      return jobs..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    } catch (e) {
+      debugPrint('JobPostService: Error searching jobs: $e');
+      return [];
+    }
+  }
+
+
+
+
+
+  
 }

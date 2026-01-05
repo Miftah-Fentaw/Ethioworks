@@ -5,6 +5,7 @@ import 'package:ethioworks/models/application_model.dart';
 class ApplicationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+
   Future<Application?> submitApplication(Application application) async {
     try {
       final docRef = _firestore.collection('applications').doc();

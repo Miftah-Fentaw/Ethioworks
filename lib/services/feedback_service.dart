@@ -5,6 +5,7 @@ import 'package:ethioworks/models/feedback_model.dart';
 class FeedbackService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+
   Future<Feedback?> submitFeedback(Feedback feedback) async {
     try {
       final docRef = _firestore.collection('feedbacks').doc();
@@ -23,6 +24,9 @@ class FeedbackService {
       return null;
     }
   }
+
+
+
 
   Future<List<Feedback>> getAllFeedback() async {
     try {
