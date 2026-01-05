@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:ethioworks/providers/auth_provider.dart';
 import 'package:ethioworks/providers/job_provider.dart';
 import 'package:ethioworks/providers/application_provider.dart';
+import 'package:ethioworks/providers/theme_provider.dart';
 import 'package:ethioworks/screens/mobile/auth/splash.dart';
 import 'package:ethioworks/screens/web_and_desktop/auth/splash.dart'
     as web_splash;
@@ -29,17 +30,23 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => JobProvider()),
         ChangeNotifierProvider(create: (_) => ApplicationProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: MaterialApp(
-        title: 'EthioWorks - Job Connection Platform',
-        debugShowCheckedModeBanner: false,
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        themeMode: ThemeMode.system,
-        home: const ResponsiveLayout(
-          mobile: SplashScreen(),
-          desktop: web_splash.WebSplashScreen(),
-        ),
+      child: Builder(
+        builder: (context) {
+          final themeProvider = context.watch<ThemeProvider>();
+          return MaterialApp(
+            title: 'EthioWorks - Job Connection Platform',
+            debugShowCheckedModeBanner: false,
+            theme: lightTheme,
+            darkTheme: darkTheme,
+            themeMode: themeProvider.themeMode,
+            home: const ResponsiveLayout(
+              mobile: SplashScreen(),
+              desktop: web_splash.WebSplashScreen(),
+            ),
+          );
+        },
       ),
     );
   }
