@@ -31,6 +31,10 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+
+
+
+  // sign up function for both user types
   Future<bool> signUp({
     required String email,
     required String password,
@@ -70,6 +74,10 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  
+  
+  
+  // login function for both user types
   Future<bool> login(String email, String password) async {
     _isLoading = true;
     _errorMessage = null;
@@ -101,6 +109,9 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+
+
+  // logout function for both user types
   Future<void> logout() async {
     await _authService.logout();
     _currentUser = null;
@@ -108,6 +119,9 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+
+
+  // reset password function for both user types
   Future<bool> resetPassword(String email) async {
     _isLoading = true;
     _errorMessage = null;
@@ -127,6 +141,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // update user function for both user types
   Future<void> updateUser(User user) async {
     await _authService.updateCurrentUser(user);
     _currentUser = user;

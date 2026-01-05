@@ -13,6 +13,8 @@ class ApplicationProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  
+  // submitting application function for job_seekers
   Future<bool> submitApplication(Application application) async {
     _isLoading = true;
     notifyListeners();
@@ -32,6 +34,7 @@ class ApplicationProvider with ChangeNotifier {
     }
   }
 
+  // loading applications function for both user types
   Future<void> loadApplicationsByJob(String jobId) async {
     _isLoading = true;
     notifyListeners();
@@ -47,6 +50,7 @@ class ApplicationProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // loading applications function for both user types
   Future<void> loadApplicationsByUser(String userId) async {
     _isLoading = true;
     notifyListeners();
@@ -62,14 +66,17 @@ class ApplicationProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // getting application by id function for both user types
   Future<Application?> getApplicationById(String id) async {
     return await _applicationService.getApplicationById(id);
   }
 
+  // checking if user has applied to a job function for both user types
   Future<bool> hasUserApplied(String userId, String jobId) async {
     return await _applicationService.hasUserApplied(userId, jobId);
   }
 
+  // clear error function for both user types
   void clearError() {
     _errorMessage = null;
     notifyListeners();
