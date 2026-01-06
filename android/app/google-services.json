@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "967747189066",
+    "project_id": "ethioworks-5e973",
+    "storage_bucket": "ethioworks-5e973.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:967747189066:android:d1b742080c531bedbea9b3",
+        "android_client_info": {
+          "package_name": "com.example.ethioworks"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRrbFaI2tLIuGTQOf824IAnKtwiWViN1s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
