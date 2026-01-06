@@ -46,7 +46,6 @@ app.*.map.json
 
 # Secrets and Local Configurations
 .firebase/
-lib/firebase_options.dart
 firebase.json
 *.keystore
 *.jks
@@ -60,7 +59,6 @@ macos/Flutter/Generated.xcconfig
 macos/Flutter/flutter_export_environment.sh
 
 # Google Services and Firebase
-android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 .firebase/
 firebase-debug.log
